@@ -152,7 +152,7 @@ export function GameBoard({
           <button
             key={index}
             onClick={() => handleCellClick(index)}
-            disabled={isLoading || board[index] !== GAME_CONSTANTS.MARK_EMPTY || !isCurrentPlayerTurn() || gameOver}
+            disabled={isLoading || board[index] !== GAME_CONSTANTS.MARK_EMPTY || !isCurrentPlayerTurn() || !!gameOver}
             className={`
               aspect-square border-2 border-black rounded-lg flex items-center justify-center
               text-4xl font-bold transition-all duration-200 bg-white
