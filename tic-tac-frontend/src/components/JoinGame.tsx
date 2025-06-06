@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import { Trophy, Loader2, AlertCircle } from 'lucide-react';
-import { GAME_MODE, GAME_STATUS } from '@/config/constants';
 
 interface JoinGameProps {
   gameId: string;

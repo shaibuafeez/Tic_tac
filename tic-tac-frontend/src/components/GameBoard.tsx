@@ -1,8 +1,10 @@
 'use client';
 
-import { RotateCcw, Trophy, Users } from 'lucide-react';
+import { RotateCcw, Trophy, Users, Wifi } from 'lucide-react';
 import { GameState } from './TicTacToeGame';
-import { GAME_CONSTANTS, UI_CONFIG, GAME_MODE, GAME_STATUS } from '@/config/constants';
+import { GAME_CONSTANTS, UI_CONFIG, GAME_STATUS } from '@/config/constants';
+import { useGameSync } from '@/hooks/useGameSync';
+import { useState, useEffect } from 'react';
 
 interface GameBoardProps {
   gameState: GameState;
@@ -13,13 +15,35 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ 
-  gameState, 
+  gameState: initialGameState, 
   onMakeMove, 
   onResetGame, 
   isLoading, 
   currentPlayer 
 }: GameBoardProps) {
+  const [gameState, setGameState] = useState(initialGameState);
+  const [isLive, setIsLive] = useState(false);
   const { board, turn, x, o } = gameState;
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setGameState(initialGameState);
+  }, [initialGameState]);
+
+  // Enable real-time sync for non-local games
+  const shouldSync = !gameState.id.startsWith('game-') && !gameState.id.startsWith('demo-');
+  
+  useGameSync({
+    gameId: shouldSync ? gameState.id : null,
+    onGameUpdate: (updatedGame) => {
+      setGameState(updatedGame);
+      setIsLive(true);
+      // Flash the live indicator
+      setTimeout(() => setIsLive(false), 1000);
+    },
+    enabled: shouldSync && gameState.status === GAME_STATUS.ACTIVE,
+    interval: 2000, // Poll every 2 seconds
+  });
 
   const truncateAddress = (address: string) => {
     if (address.length <= UI_CONFIG.MAX_ADDRESS_LENGTH) return address;
@@ -87,10 +111,18 @@ export function GameBoard({
       {/* Game Info */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-black flex items-center gap-2">
-            {gameState.mode === 1 ? <Trophy className="w-6 h-6" /> : <Users className="w-6 h-6" />}
-            {gameState.mode === 1 ? 'Competitive Game' : 'Friendly Game'}
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-black flex items-center gap-2">
+              {gameState.mode === 1 ? <Trophy className="w-6 h-6" /> : <Users className="w-6 h-6" />}
+              {gameState.mode === 1 ? 'Competitive Game' : 'Friendly Game'}
+            </h2>
+            {shouldSync && (
+              <div className={`flex items-center gap-1 text-sm ${isLive ? 'text-green-600' : 'text-gray-500'}`}>
+                <Wifi className="w-4 h-4" />
+                <span>{isLive ? 'Live' : 'Connected'}</span>
+              </div>
+            )}
+          </div>
           <button
             onClick={onResetGame}
             className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-colors border border-gray-300"

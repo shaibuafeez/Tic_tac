@@ -1,13 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useState, useEffect } from 'react';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { GameBoard } from './GameBoard';
 import { GameModeSelection } from './GameModeSelection';
 import { JoinGame } from './JoinGame';
 import { GameList } from './GameList';
+import { ShareGame } from './ShareGame';
 import { CONTRACT_CONFIG, GAME_CONSTANTS, GAME_MODE, GAME_STATUS } from '@/config/constants';
+import { useRouter } from 'next/navigation';
+import { useGameSync } from '@/hooks/useGameSync';
 
 export interface GameState {
   id: string;
@@ -24,13 +27,95 @@ export interface GameState {
   viewerLink?: string;
 }
 
-export function TicTacToeGame() {
+interface TicTacToeGameProps {
+  gameId?: string;
+}
+
+export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showGameList, setShowGameList] = useState(false);
   const [showJoinGame, setShowJoinGame] = useState(false);
+  const [showShareGame, setShowShareGame] = useState(false);
+  const [shareLinks, setShareLinks] = useState({ gameLink: '', viewerLink: '' });
   const account = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+  const router = useRouter();
+
+  // Use real-time sync when waiting for opponent
+  const shouldSyncWaiting = gameState?.status === GAME_STATUS.WAITING && 
+                           gameState?.mode === GAME_MODE.COMPETITIVE &&
+                           !gameState.id.startsWith('game-');
+
+  useGameSync({
+    gameId: shouldSyncWaiting ? gameState.id : null,
+    onGameUpdate: (updatedGame) => {
+      if (updatedGame.status === GAME_STATUS.ACTIVE && gameState?.status === GAME_STATUS.WAITING) {
+        // Game has started! Hide join screen and update state
+        setShowJoinGame(false);
+        setGameState(updatedGame);
+        alert('Opponent has joined! Game is starting.');
+      }
+    },
+    enabled: shouldSyncWaiting,
+    interval: 3000,
+  });
+
+  // Load game if gameId is provided
+  useEffect(() => {
+    if (gameId) {
+      loadGame(gameId);
+    }
+  }, [gameId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadGame = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const object = await suiClient.getObject({
+        id,
+        options: {
+          showContent: true,
+        },
+      });
+
+      if (!object.data) {
+        alert('Game not found');
+        router.push('/');
+        return;
+      }
+
+      // Parse game data - in production this would parse the actual Move object
+      // For now, create a mock game state
+      const mockGame: GameState = {
+        id,
+        board: Array(9).fill(GAME_CONSTANTS.MARK_EMPTY),
+        turn: 0,
+        x: account?.address || '0x0',
+        o: '',
+        mode: GAME_MODE.COMPETITIVE,
+        status: GAME_STATUS.WAITING,
+        stakeAmount: 2_000_000_000,
+        creator: '0x123',
+        winner: '',
+        gameLink: `${window.location.origin}/game/${id}`,
+        viewerLink: `${window.location.origin}/view/${id}`,
+      };
+
+      setGameState(mockGame);
+      
+      // If it's a competitive game waiting for players, show join screen
+      if (mockGame.mode === GAME_MODE.COMPETITIVE && mockGame.status === GAME_STATUS.WAITING && mockGame.creator !== account?.address) {
+        setShowJoinGame(true);
+      }
+    } catch (error) {
+      console.error('Error loading game:', error);
+      alert('Failed to load game');
+      router.push('/');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const createGame = async (mode: number, stakeAmount?: number) => {
     if (!account) return;
@@ -68,12 +153,14 @@ export function TicTacToeGame() {
           onSuccess: (result) => {
             console.log('Game created:', result);
             
-            // Extract game links from the transaction result
-            // In production, you'd parse the actual return values
-            const gameLink = `game_${result.digest}`;
-            const viewerLink = `viewer_${result.digest}`;
+            // For now, use a mock game ID (in production, extract from transaction result)
+            const newGameId = `0x${Date.now().toString(16)}`;
+            const gameLink = `${window.location.origin}/game/${newGameId}`;
+            const viewerLink = `${window.location.origin}/view/${newGameId}`;
             
-            alert(`Game created! Share these links:\nGame Link: ${gameLink}\nViewer Link: ${viewerLink}`);
+            // Set share links and show share modal
+            setShareLinks({ gameLink, viewerLink });
+            setShowShareGame(true);
             
             // Create a local game state
             setGameState({
@@ -298,12 +385,22 @@ export function TicTacToeGame() {
   }
 
   return (
-    <GameBoard
-      gameState={gameState}
-      onMakeMove={makeMove}
-      onResetGame={resetGame}
-      isLoading={isLoading}
-      currentPlayer={account.address}
-    />
+    <>
+      <GameBoard
+        gameState={gameState}
+        onMakeMove={makeMove}
+        onResetGame={resetGame}
+        isLoading={isLoading}
+        currentPlayer={account.address}
+      />
+      
+      {showShareGame && (
+        <ShareGame
+          gameLink={shareLinks.gameLink}
+          viewerLink={shareLinks.viewerLink}
+          onClose={() => setShowShareGame(false)}
+        />
+      )}
+    </>
   );
 }
