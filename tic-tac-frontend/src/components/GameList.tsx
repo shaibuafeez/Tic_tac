@@ -11,6 +11,7 @@ interface Game {
   turn: number;
   x: string;
   o: string;
+  isActive: boolean;
 }
 
 interface GameListProps {
@@ -43,14 +44,16 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
           board: [0, 0, 0, 0, 0, 0, 0, 0, 0],
           turn: 0,
           x: currentPlayer,
-          o: '0x1234...5678'
+          o: '0x1234...5678',
+          isActive: true
         },
         {
           id: 'demo-game-2',
           board: [1, 0, 0, 0, 2, 0, 0, 0, 0],
           turn: 2,
           x: '0x8765...4321',
-          o: currentPlayer
+          o: currentPlayer,
+          isActive: true
         }
       ];
 
