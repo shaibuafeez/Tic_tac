@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useCurrentAccount, useSuiClient, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { GameBoard } from './GameBoard';
 import { GameCreation } from './GameCreation';
 import { GameList } from './GameList';
 import { CONTRACT_CONFIG, GAME_CONSTANTS } from '@/config/constants';
-import { parseTransactionEffects } from '@/utils/sui-helpers';
 
 export interface GameState {
   id: string;
@@ -23,7 +22,6 @@ export function TicTacToeGame() {
   const [isLoading, setIsLoading] = useState(false);
   const [showGameList, setShowGameList] = useState(false);
   const account = useCurrentAccount();
-  const suiClient = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
   const createGame = async (playerO: string) => {

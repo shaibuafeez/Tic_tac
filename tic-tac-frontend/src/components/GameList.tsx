@@ -64,7 +64,7 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
 
   useEffect(() => {
     fetchGames();
-  }, [currentPlayer]);
+  }, [currentPlayer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const truncateAddress = (address: string) => {
     if (address.includes('...')) return address; // Already truncated

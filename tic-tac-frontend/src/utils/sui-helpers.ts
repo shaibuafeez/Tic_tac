@@ -23,12 +23,12 @@ export function parseTransactionEffects(result: SuiTransactionBlockResponse) {
   };
 }
 
-export function extractGameObjectId(effects: any): string | null {
+export function extractGameObjectId(effects: unknown): string | null {
   try {
     // If effects is already parsed
-    if (effects.created) {
-      const sharedObject = effects.created.find((obj: any) => 
-        obj.owner === 'Shared' || (obj.owner && obj.owner.Shared)
+    if (effects && typeof effects === 'object' && 'created' in effects && Array.isArray(effects.created)) {
+      const sharedObject = effects.created.find((obj: Record<string, unknown>) => 
+        obj.owner === 'Shared' || (obj.owner && typeof obj.owner === 'object' && 'Shared' in obj.owner)
       );
       return sharedObject?.reference?.objectId || null;
     }

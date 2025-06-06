@@ -55,7 +55,7 @@ export function GameBoard({
       [0, 4, 8], [2, 4, 6] // diagonals
     ];
 
-    for (let line of lines) {
+    for (const line of lines) {
       const [a, b, c] = line;
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
         return board[a] === GAME_CONSTANTS.MARK_X ? x : o;
