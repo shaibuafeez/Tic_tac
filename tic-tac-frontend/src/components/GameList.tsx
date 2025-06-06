@@ -11,7 +11,13 @@ interface Game {
   turn: number;
   x: string;
   o: string;
-  isActive: boolean;
+  mode: number;
+  status: number;
+  stakeAmount: number;
+  creator: string;
+  winner: string;
+  gameLink?: string;
+  viewerLink?: string;
 }
 
 interface GameListProps {
@@ -45,7 +51,11 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
           turn: 0,
           x: currentPlayer,
           o: '0x1234...5678',
-          isActive: true
+          mode: 0, // Friendly
+          status: 1, // Active
+          stakeAmount: 0,
+          creator: currentPlayer,
+          winner: '',
         },
         {
           id: 'demo-game-2',
@@ -53,7 +63,11 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
           turn: 2,
           x: '0x8765...4321',
           o: currentPlayer,
-          isActive: true
+          mode: 1, // Competitive
+          status: 0, // Waiting
+          stakeAmount: 2_000_000_000, // 2 SUI
+          creator: '0x8765...4321',
+          winner: '',
         }
       ];
 
@@ -130,9 +144,16 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
               className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-black transition-colors text-left"
             >
               <div className="flex justify-between items-start mb-2">
-                <span className="text-sm font-mono text-gray-600">
-                  {truncateAddress(game.id)}
-                </span>
+                <div>
+                  <span className="text-sm font-mono text-gray-600">
+                    {truncateAddress(game.id)}
+                  </span>
+                  {game.mode === 1 && (
+                    <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                      {(game.stakeAmount / 1_000_000_000).toFixed(1)} SUI
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs text-gray-500">
                   Turn {game.turn}
                 </span>

@@ -2,7 +2,7 @@
 
 import { RotateCcw, Trophy, Users } from 'lucide-react';
 import { GameState } from './TicTacToeGame';
-import { GAME_CONSTANTS, UI_CONFIG } from '@/config/constants';
+import { GAME_CONSTANTS, UI_CONFIG, GAME_MODE, GAME_STATUS } from '@/config/constants';
 
 interface GameBoardProps {
   gameState: GameState;
@@ -88,8 +88,8 @@ export function GameBoard({
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-black flex items-center gap-2">
-            <Users className="w-6 h-6" />
-            {gameState.id.startsWith('demo-') ? 'Demo Game' : 'Game in Progress'}
+            {gameState.mode === 1 ? <Trophy className="w-6 h-6" /> : <Users className="w-6 h-6" />}
+            {gameState.mode === 1 ? 'Competitive Game' : 'Friendly Game'}
           </h2>
           <button
             onClick={onResetGame}
@@ -120,6 +120,21 @@ export function GameBoard({
             )}
           </div>
         </div>
+
+        {/* Prize Pool for Competitive Games */}
+        {gameState.mode === 1 && gameState.stakeAmount > 0 && (
+          <div className="mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-yellow-800">Prize Pool</span>
+              <span className="text-lg font-bold text-yellow-900">
+                {((gameState.stakeAmount * 2) / 1_000_000_000).toFixed(2)} SUI
+              </span>
+            </div>
+            <p className="text-xs text-yellow-700 mt-1">
+              Winner takes {((gameState.stakeAmount * 2 * 0.9) / 1_000_000_000).toFixed(2)} SUI (90%)
+            </p>
+          </div>
+        )}
 
         {/* Game Status */}
         <div className="text-center p-3 rounded-lg bg-gray-50 border border-gray-200">
