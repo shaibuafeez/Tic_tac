@@ -1,4 +1,4 @@
-# Tic-Tac-Toe Game Test Checklist
+# TicTac Game Test Checklist
 
 ## 1. Smart Contract Functionality Tests
 

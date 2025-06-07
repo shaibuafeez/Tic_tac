@@ -8,8 +8,8 @@ export const translations = {
     confirm: 'Confirm',
     
     // App info
-    gameTitle: 'Sui Tic-Tac-Toe',
-    gameDescription: 'A decentralized tic-tac-toe game built on Sui blockchain',
+    gameTitle: 'TicTac',
+    gameDescription: 'A decentralized game built on Sui blockchain',
     
     // Navigation
     home: 'Home',
@@ -159,8 +159,8 @@ export const translations = {
     confirm: 'Confirmar',
     
     // App info
-    gameTitle: 'Sui Tic-Tac-Toe',
-    gameDescription: 'Un juego de tres en raya descentralizado construido en la blockchain Sui',
+    gameTitle: 'TicTac',
+    gameDescription: 'Un juego descentralizado construido en la blockchain Sui',
     
     // Navigation
     home: 'Inicio',
@@ -310,8 +310,8 @@ export const translations = {
     confirm: '确认',
     
     // App info
-    gameTitle: 'Sui井字游戏',
-    gameDescription: '基于Sui区块链构建的去中心化井字游戏',
+    gameTitle: 'TicTac',
+    gameDescription: '基于Sui区块链构建的去中心化游戏',
     
     // Navigation
     home: '主页',

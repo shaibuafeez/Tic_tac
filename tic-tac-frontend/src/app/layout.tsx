@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sui Tic-Tac-Toe",
-  description: "A decentralized tic-tac-toe game built on Sui blockchain",
+  title: "TicTac",
+  description: "A decentralized game built on Sui blockchain",
 };
 
 export default function RootLayout({

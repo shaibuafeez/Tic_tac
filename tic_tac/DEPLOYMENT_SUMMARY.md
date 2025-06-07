@@ -1,4 +1,4 @@
-# Tic-Tac-Toe Deployment Summary
+# TicTac Deployment Summary
 
 ## Deployment Successful! 🎉
 

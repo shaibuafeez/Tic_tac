@@ -1,4 +1,4 @@
-# Tic-Tac-Toe Smart Contract Deployment Guide
+# TicTac Smart Contract Deployment Guide
 
 ## Prerequisites
 
