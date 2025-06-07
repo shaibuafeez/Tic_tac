@@ -1,7 +1,7 @@
 // Contract deployment information
 export const CONTRACT_CONFIG = {
-  PACKAGE_ID: "0xb1bd6ea90c262ae8bbedc5a4ef609381b621b63eeec7e5c95fbdb5062dcfbd41",
-  TREASURY_ID: "0x7deeac78dbfd70438e9a2f9fb76d0db6fd095c52658762dda2f5a6e366e65810",
+  PACKAGE_ID: "0xb6ee34b9554a69c317a60104593534573b85469881219f5077c0a23c30db76f9",
+  TREASURY_ID: "0x554f6100d77b7fde9b42dd475895805fd45da16141367ba41fd4cb88d540b9c7",
   NETWORK: "testnet" as const,
 } as const;
 

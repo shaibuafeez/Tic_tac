@@ -29,6 +29,12 @@ export function GameViewer({ gameId }: GameViewerProps) {
 
   const fetchGameData = async () => {
     try {
+      // Check if this is a demo game
+      if (gameId.startsWith('demo-game-')) {
+        setError('This is a demo game that cannot be viewed by others. Please create a new competitive game to get a shareable viewer link.');
+        return;
+      }
+
       const object = await suiClient.getObject({
         id: gameId,
         options: {
@@ -41,20 +47,36 @@ export function GameViewer({ gameId }: GameViewerProps) {
         return;
       }
 
-      // Parse game data from the object
-      // This is a simplified version - in production you'd parse the actual Move object
-      const mockGameData: GameData = {
-        board: [0, 1, 0, 0, 2, 0, 0, 0, 0], // Mock data
-        turn: 2,
-        x: '0x1234...5678',
-        o: '0x8765...4321',
-        mode: GAME_MODE.COMPETITIVE,
-        status: GAME_STATUS.ACTIVE,
-        stakeAmount: 2_000_000_000,
-        winner: '',
-      };
+      // Parse game data from the actual Move object
+      const content = object.data.content;
+      if (!content || !('fields' in content)) {
+        setError('Invalid game data format');
+        return;
+      }
 
-      setGameData(mockGameData);
+      const fields = content.fields as Record<string, unknown>;
+      console.log('Viewer - Game fields from blockchain:', fields);
+      
+      // Parse the board array properly
+      let board = Array(9).fill(0);
+      if (fields.board && Array.isArray(fields.board)) {
+        board = fields.board.map(cell => Number(cell));
+      }
+      
+      const gameData: GameData = {
+        board,
+        turn: Number(fields.turn) || 0,
+        x: String(fields.x) || '',
+        o: String(fields.o) || '',
+        mode: fields.mode !== undefined ? Number(fields.mode) : GAME_MODE.COMPETITIVE,
+        status: fields.status !== undefined ? Number(fields.status) : GAME_STATUS.WAITING,
+        stakeAmount: Number(fields.stake_amount) || 0,
+        winner: String(fields.winner) || '',
+      };
+      
+      console.log('Viewer - Parsed game data:', gameData);
+
+      setGameData(gameData);
       setError(null);
     } catch (err) {
       console.error('Error fetching game:', err);

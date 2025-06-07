@@ -20,8 +20,12 @@ export function useGameSync({
   const lastUpdateRef = useRef<string>('');
 
   const fetchGameState = async () => {
-    if (!gameId || !enabled) return;
+    if (!gameId || !enabled) {
+      console.log('Game sync skipped:', { gameId, enabled });
+      return;
+    }
 
+    console.log('Fetching game state for sync:', gameId);
     try {
       const object = await suiClient.getObject({
         id: gameId,
@@ -53,19 +57,25 @@ export function useGameSync({
         if (stateHash !== lastUpdateRef.current) {
           lastUpdateRef.current = stateHash;
           
+          // Parse the board array properly
+          let board = Array(9).fill(0);
+          if (fields.board && Array.isArray(fields.board)) {
+            board = fields.board.map(cell => Number(cell));
+          }
+          
           const gameState: GameState = {
             id: gameId,
-            board: (fields.board as number[]) || [],
-            turn: (fields.turn as number) || 0,
-            x: (fields.x as string) || '',
-            o: (fields.o as string) || '',
-            mode: (fields.mode as number) || 0,
-            status: (fields.status as number) || 0,
-            stakeAmount: (fields.stake_amount as number) || 0,
-            creator: (fields.creator as string) || '',
-            winner: (fields.winner as string) || '',
-            gameLink: (fields.game_link as string) || '',
-            viewerLink: (fields.viewer_link as string) || '',
+            board,
+            turn: Number(fields.turn) || 0,
+            x: String(fields.x) || '',
+            o: String(fields.o) || '',
+            mode: fields.mode !== undefined ? Number(fields.mode) : 0,
+            status: fields.status !== undefined ? Number(fields.status) : 0,
+            stakeAmount: Number(fields.stake_amount) || 0,
+            creator: String(fields.creator) || '',
+            winner: String(fields.winner) || '',
+            gameLink: `${window.location.origin}/game/${gameId}`,
+            viewerLink: `${window.location.origin}/view/${gameId}`,
           };
 
           onGameUpdate(gameState);

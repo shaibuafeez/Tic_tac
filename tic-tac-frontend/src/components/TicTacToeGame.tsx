@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient, ConnectButton } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { GameBoard } from './GameBoard';
 import { GameModeSelection } from './GameModeSelection';
@@ -39,26 +39,43 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const [showShareGame, setShowShareGame] = useState(false);
   const [shareLinks, setShareLinks] = useState({ gameLink: '', viewerLink: '' });
   const account = useCurrentAccount();
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction({
+    execute: async ({ bytes, signature }) => 
+      await suiClient.executeTransactionBlock({
+        transactionBlock: bytes,
+        signature,
+        options: {
+          showRawEffects: true,
+          showObjectChanges: true,
+          showEvents: true,
+          showInput: true,
+          showBalanceChanges: true,
+        },
+      }),
+  });
   const suiClient = useSuiClient();
   const router = useRouter();
 
-  // Use real-time sync when waiting for opponent
-  const shouldSyncWaiting = gameState?.status === GAME_STATUS.WAITING && 
-                           gameState?.mode === GAME_MODE.COMPETITIVE &&
-                           !gameState.id.startsWith('game-');
+  // Use real-time sync when waiting for opponent (for both game types)
+  // or when in active game to see opponent moves
+  const shouldSync = gameState !== null && 
+                    !gameState.id.startsWith('game-') &&
+                    (gameState.status === GAME_STATUS.WAITING || gameState.status === GAME_STATUS.ACTIVE);
 
   useGameSync({
-    gameId: shouldSyncWaiting ? gameState.id : null,
+    gameId: shouldSync ? gameState.id : null,
     onGameUpdate: (updatedGame) => {
+      console.log('Game sync update received:', updatedGame);
       if (updatedGame.status === GAME_STATUS.ACTIVE && gameState?.status === GAME_STATUS.WAITING) {
         // Game has started! Hide join screen and update state
         setShowJoinGame(false);
         setGameState(updatedGame);
-        alert('Opponent has joined! Game is starting.');
+      } else {
+        // Update game state even if status hasn't changed to ACTIVE
+        setGameState(updatedGame);
       }
     },
-    enabled: shouldSyncWaiting,
+    enabled: shouldSync,
     interval: 3000,
   });
 
@@ -72,6 +89,15 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const loadGame = async (id: string) => {
     setIsLoading(true);
     try {
+      // Check if this is a demo game
+      if (id.startsWith('demo-game-')) {
+        alert('This is a demo game link. The game was created locally and cannot be shared. Please ask the game creator to create a new competitive game to get a shareable link.');
+        router.push('/');
+        return;
+      }
+      
+      console.log('Loading game with ID:', id);
+
       const object = await suiClient.getObject({
         id,
         options: {
@@ -80,37 +106,63 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       });
 
       if (!object.data) {
-        alert('Game not found');
+        console.error('Game object not found for ID:', id);
+        alert('Game not found. This could mean:\n1. The game was created in demo mode and cannot be shared\n2. The game ID is invalid\n3. The game was deleted\n\nPlease ask the game creator to create a new competitive game.');
         router.push('/');
         return;
       }
 
-      // Parse game data - in production this would parse the actual Move object
-      // For now, create a mock game state
-      const mockGame: GameState = {
+      // Parse game data from the actual Move object
+      const content = object.data.content;
+      if (!content || !('fields' in content)) {
+        alert('Invalid game data format');
+        router.push('/');
+        return;
+      }
+
+      const fields = content.fields as Record<string, unknown>;
+      console.log('Game fields from blockchain:', fields);
+      
+      // Parse the board array properly
+      let board = Array(9).fill(GAME_CONSTANTS.MARK_EMPTY);
+      if (fields.board && Array.isArray(fields.board)) {
+        board = fields.board.map(cell => Number(cell));
+      }
+      
+      const gameState: GameState = {
         id,
-        board: Array(9).fill(GAME_CONSTANTS.MARK_EMPTY),
-        turn: 0,
-        x: account?.address || '0x0',
-        o: '',
-        mode: GAME_MODE.COMPETITIVE,
-        status: GAME_STATUS.WAITING,
-        stakeAmount: 2_000_000_000,
-        creator: '0x123',
-        winner: '',
+        board,
+        turn: Number(fields.turn) || 0,
+        x: String(fields.x) || '',
+        o: String(fields.o) || '',
+        mode: fields.mode !== undefined ? Number(fields.mode) : GAME_MODE.COMPETITIVE,
+        status: fields.status !== undefined ? Number(fields.status) : GAME_STATUS.WAITING,
+        stakeAmount: Number(fields.stake_amount) || 0,
+        creator: String(fields.creator) || '',
+        winner: String(fields.winner) || '',
         gameLink: `${window.location.origin}/game/${id}`,
         viewerLink: `${window.location.origin}/view/${id}`,
       };
-
-      setGameState(mockGame);
       
-      // If it's a competitive game waiting for players, show join screen
-      if (mockGame.mode === GAME_MODE.COMPETITIVE && mockGame.status === GAME_STATUS.WAITING && mockGame.creator !== account?.address) {
+      console.log('Parsed game state:', gameState);
+      console.log('Current account:', account?.address);
+      console.log('Game creator:', gameState.creator);
+      console.log('Player X:', gameState.x);
+      console.log('Player O:', gameState.o);
+      console.log('Game mode value:', gameState.mode);
+      console.log('Is competitive?', gameState.mode === GAME_MODE.COMPETITIVE);
+      console.log('Is friendly?', gameState.mode === GAME_MODE.FRIENDLY);
+
+      setGameState(gameState);
+      
+      // If it's a game waiting for players and user is not the creator, show join screen
+      if (gameState.status === GAME_STATUS.WAITING && gameState.creator !== account?.address) {
         setShowJoinGame(true);
       }
     } catch (error) {
       console.error('Error loading game:', error);
-      alert('Failed to load game');
+      console.error('Game ID that failed:', id);
+      alert('Failed to load game. This could mean:\n1. The game ID is invalid\n2. Network connection issues\n3. The game was created in demo mode\n\nPlease check your connection and try again, or ask for a new game link.');
       router.push('/');
     } finally {
       setIsLoading(false);
@@ -125,14 +177,9 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       const transaction = new Transaction();
       
       if (mode === GAME_MODE.FRIENDLY) {
-        // For now, create a friendly game with a placeholder opponent
-        const opponentAddress = "0x0000000000000000000000000000000000000000000000000000000000000000";
-        
         transaction.moveCall({
           target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::create_friendly_game`,
-          arguments: [
-            transaction.pure.address(opponentAddress),
-          ],
+          arguments: [],
         });
       } else if (mode === GAME_MODE.COMPETITIVE && stakeAmount) {
         // Split coins for the stake
@@ -151,12 +198,54 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         { transaction },
         {
           onSuccess: (result) => {
-            console.log('Game created:', result);
+            console.log('Game created successfully');
+            console.log('Transaction digest:', result.digest);
+            console.log('Full transaction result:', result);
             
-            // For now, use a mock game ID (in production, extract from transaction result)
-            const newGameId = `0x${Date.now().toString(16)}`;
-            const gameLink = `${window.location.origin}/game/${newGameId}`;
-            const viewerLink = `${window.location.origin}/view/${newGameId}`;
+            let gameId: string | null = null;
+            
+            // Extract from objectChanges (now available due to options)
+            const resultWithChanges = result as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+            if (resultWithChanges.objectChanges) {
+              const createdObjects = resultWithChanges.objectChanges.filter(
+                (change: any) => change.type === 'created' // eslint-disable-line @typescript-eslint/no-explicit-any
+              );
+              console.log('Created objects from transaction result:', createdObjects);
+              
+              const gameObject = createdObjects.find((obj: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                return obj.objectType && obj.objectType.includes('tic_tac::Game');
+              });
+              
+              if (gameObject) {
+                gameId = gameObject.objectId;
+                console.log('Successfully extracted game ID from objectChanges:', gameId);
+              }
+            }
+            
+            // Fallback: Extract from events
+            if (!gameId && resultWithChanges.events) {
+              console.log('Trying to extract from events:', resultWithChanges.events);
+              const gameCreatedEvent = resultWithChanges.events.find((event: any) => // eslint-disable-line @typescript-eslint/no-explicit-any
+                event.type && event.type.includes('GameCreated')
+              );
+              
+              if (gameCreatedEvent && gameCreatedEvent.parsedJson) {
+                const eventData = gameCreatedEvent.parsedJson as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+                if (eventData.game_id) {
+                  gameId = eventData.game_id;
+                  console.log('Successfully extracted game ID from events:', gameId);
+                }
+              }
+            }
+            
+            if (!gameId) {
+              console.error('Failed to extract game ID from transaction result');
+              alert('Failed to create game properly. Please try again.');
+              return;
+            }
+            
+            const gameLink = `${window.location.origin}/game/${gameId}`;
+            const viewerLink = `${window.location.origin}/view/${gameId}`;
             
             // Set share links and show share modal
             setShareLinks({ gameLink, viewerLink });
@@ -164,13 +253,13 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
             
             // Create a local game state
             setGameState({
-              id: 'game-' + Date.now(),
+              id: gameId,
               board: Array(9).fill(GAME_CONSTANTS.MARK_EMPTY),
               turn: 0,
               x: account.address,
-              o: mode === GAME_MODE.FRIENDLY ? "0x0000000000000000000000000000000000000000000000000000000000000000" : "",
+              o: "", // Empty for both game types until someone joins
               mode,
-              status: mode === GAME_MODE.FRIENDLY ? GAME_STATUS.ACTIVE : GAME_STATUS.WAITING,
+              status: GAME_STATUS.WAITING, // Both game types start in waiting state
               stakeAmount: stakeAmount || 0,
               creator: account.address,
               winner: "",
@@ -178,9 +267,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
               viewerLink,
             });
             
-            if (mode === GAME_MODE.COMPETITIVE) {
-              setShowJoinGame(true);
-            }
+            // Both game types show join screen for sharing
+            setShowJoinGame(true);
           },
           onError: (error) => {
             console.error('Failed to create game:', error);
@@ -195,8 +283,69 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     }
   };
 
+  const joinFriendlyGame = async () => {
+    if (!account || !gameState) return;
+
+    console.log('Joining friendly game:', {
+      gameId: gameState.id,
+      gameMode: gameState.mode,
+      expectedMode: GAME_MODE.FRIENDLY
+    });
+
+    setIsLoading(true);
+    try {
+      const transaction = new Transaction();
+      
+      transaction.moveCall({
+        target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::join_friendly_game`,
+        arguments: [
+          transaction.object(gameState.id),
+        ],
+      });
+
+      signAndExecute(
+        { transaction },
+        {
+          onSuccess: async (result) => {
+            console.log('Joined friendly game:', result);
+            
+            // Reload the game from blockchain to get the updated state
+            try {
+              await loadGame(gameState.id);
+              setShowJoinGame(false);
+            } catch (error) {
+              console.error('Error reloading game after join:', error);
+              // Fallback to manual update
+              setGameState({
+                ...gameState,
+                o: account.address,
+                status: GAME_STATUS.ACTIVE,
+              });
+              setShowJoinGame(false);
+            }
+          },
+          onError: (error) => {
+            console.error('Failed to join friendly game:', error);
+            alert('Failed to join game. Please try again.');
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Error joining friendly game:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const joinCompetitiveGame = async () => {
     if (!account || !gameState) return;
+
+    console.log('Joining competitive game:', {
+      gameId: gameState.id,
+      gameMode: gameState.mode,
+      expectedMode: GAME_MODE.COMPETITIVE,
+      stakeAmount: gameState.stakeAmount
+    });
 
     setIsLoading(true);
     try {
@@ -219,17 +368,23 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       signAndExecute(
         { transaction },
         {
-          onSuccess: (result) => {
+          onSuccess: async (result) => {
             console.log('Joined game:', result);
             
-            // Update game state
-            setGameState({
-              ...gameState,
-              o: account.address,
-              status: GAME_STATUS.ACTIVE,
-            });
-            
-            setShowJoinGame(false);
+            // Reload the game from blockchain to get the updated state
+            try {
+              await loadGame(gameState.id);
+              setShowJoinGame(false);
+            } catch (error) {
+              console.error('Error reloading game after join:', error);
+              // Fallback to manual update
+              setGameState({
+                ...gameState,
+                o: account.address,
+                status: GAME_STATUS.ACTIVE,
+              });
+              setShowJoinGame(false);
+            }
           },
           onError: (error) => {
             console.error('Failed to join game:', error);
@@ -316,36 +471,62 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     setGameState(game);
     setShowGameList(false);
     
-    // If it's a competitive game waiting for players, show join screen
-    if (game.mode === GAME_MODE.COMPETITIVE && game.status === GAME_STATUS.WAITING) {
+    // If it's a game waiting for players, show join screen
+    if (game.status === GAME_STATUS.WAITING) {
       setShowJoinGame(true);
     }
   };
 
   if (!account) {
     return (
-      <div className="bg-white border-2 border-black rounded-lg p-8 text-center">
+      <div className="bg-white border-2 border-black rounded-lg p-8 text-center max-w-md mx-auto">
         <h2 className="text-2xl font-bold text-black mb-4">
-          Connect Your Wallet
+          {gameId ? 'Join Game' : 'Connect Your Wallet'}
         </h2>
-        <p className="text-gray-600">
-          Please connect your Sui wallet to start playing tic-tac-toe!
+        <p className="text-gray-600 mb-6">
+          {gameId 
+            ? 'Connect your Sui wallet to join this tic-tac-toe game!' 
+            : 'Please connect your Sui wallet to start playing tic-tac-toe!'
+          }
         </p>
+        {gameId && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800 mb-2">
+              <strong>You&apos;ve been invited to a game!</strong>
+            </p>
+            <p className="text-xs text-blue-600">
+              Game ID: {gameId.slice(0, 8)}...{gameId.slice(-8)}
+            </p>
+          </div>
+        )}
+        <div className="flex justify-center">
+          <ConnectButton className="!bg-black !text-white hover:!bg-gray-800 !border-black !rounded-lg !px-6 !py-3 !font-medium" />
+        </div>
       </div>
     );
   }
 
   if (showJoinGame && gameState) {
     return (
-      <JoinGame
-        gameId={gameState.id}
-        stakeAmount={gameState.stakeAmount}
-        creator={gameState.creator}
-        onJoin={joinCompetitiveGame}
-        onCancel={resetGame}
-        isLoading={isLoading}
-        currentPlayer={account.address}
-      />
+      <>
+        <JoinGame
+          gameId={gameState.id}
+          stakeAmount={gameState.stakeAmount}
+          creator={gameState.creator}
+          mode={gameState.mode}
+          onJoin={gameState.mode === GAME_MODE.COMPETITIVE ? joinCompetitiveGame : joinFriendlyGame}
+          onCancel={resetGame}
+          isLoading={isLoading}
+          currentPlayer={account.address}
+        />
+        {showShareGame && (
+          <ShareGame
+            gameLink={shareLinks.gameLink}
+            viewerLink={shareLinks.viewerLink}
+            onClose={() => setShowShareGame(false)}
+          />
+        )}
+      </>
     );
   }
 

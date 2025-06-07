@@ -45,18 +45,18 @@ module tic_tac::tic_tac_tests {
         // Create friendly game
         next_tx(&mut scenario, PLAYER_X);
         {
-            let (game_link, viewer_link) = tic_tac::create_friendly_game(PLAYER_O, ctx(&mut scenario));
+            let (game_link, viewer_link) = tic_tac::create_friendly_game(ctx(&mut scenario));
             assert!(string::length(&game_link) > 0, 0);
             assert!(string::length(&viewer_link) > 0, 1);
         };
         
-        // Check game was created
+        // Check game was created in waiting status
         next_tx(&mut scenario, PLAYER_X);
         {
             assert!(test::has_most_recent_shared<Game>(), 0);
             let game = test::take_shared<Game>(&scenario);
             let (status, winner, mode, stake) = tic_tac::get_game_status(&game);
-            assert!(status == 1, 1); // STATUS_ACTIVE
+            assert!(status == 0, 1); // STATUS_WAITING
             assert!(winner == @0x0, 2);
             assert!(mode == 0, 3); // MODE_FRIENDLY
             assert!(stake == 0, 4);
@@ -145,13 +145,47 @@ module tic_tac::tic_tac_tests {
     }
 
     #[test]
+    fun test_join_friendly_game() {
+        let mut scenario = start_game();
+        
+        // Create friendly game
+        next_tx(&mut scenario, PLAYER_X);
+        {
+            tic_tac::create_friendly_game(ctx(&mut scenario));
+        };
+        
+        // Player O joins the game
+        next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test::take_shared<Game>(&scenario);
+            tic_tac::join_friendly_game(&mut game, ctx(&mut scenario));
+            
+            // Check game is now active
+            let (status, _, _, _) = tic_tac::get_game_status(&game);
+            assert!(status == 1, 0); // STATUS_ACTIVE
+            
+            test::return_shared(game);
+        };
+        
+        test::end(scenario);
+    }
+
+    #[test]
     fun test_valid_moves_friendly() {
         let mut scenario = start_game();
         
         // Create friendly game
         next_tx(&mut scenario, PLAYER_X);
         {
-            tic_tac::create_friendly_game(PLAYER_O, ctx(&mut scenario));
+            tic_tac::create_friendly_game(ctx(&mut scenario));
+        };
+        
+        // Player O joins
+        next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test::take_shared<Game>(&scenario);
+            tic_tac::join_friendly_game(&mut game, ctx(&mut scenario));
+            test::return_shared(game);
         };
         
         // X makes first move
@@ -262,10 +296,17 @@ module tic_tac::tic_tac_tests {
     fun test_invalid_turn() {
         let mut scenario = start_game();
         
-        // Create friendly game
+        // Create friendly game and join
         next_tx(&mut scenario, PLAYER_X);
         {
-            tic_tac::create_friendly_game(PLAYER_O, ctx(&mut scenario));
+            tic_tac::create_friendly_game(ctx(&mut scenario));
+        };
+        
+        next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test::take_shared<Game>(&scenario);
+            tic_tac::join_friendly_game(&mut game, ctx(&mut scenario));
+            test::return_shared(game);
         };
         
         // O tries to move first (should fail)
@@ -284,10 +325,17 @@ module tic_tac::tic_tac_tests {
     fun test_occupied_cell() {
         let mut scenario = start_game();
         
-        // Create friendly game
+        // Create friendly game and join
         next_tx(&mut scenario, PLAYER_X);
         {
-            tic_tac::create_friendly_game(PLAYER_O, ctx(&mut scenario));
+            tic_tac::create_friendly_game(ctx(&mut scenario));
+        };
+        
+        next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test::take_shared<Game>(&scenario);
+            tic_tac::join_friendly_game(&mut game, ctx(&mut scenario));
+            test::return_shared(game);
         };
         
         // X makes first move

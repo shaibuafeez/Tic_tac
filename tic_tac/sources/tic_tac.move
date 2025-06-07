@@ -36,9 +36,10 @@ module tic_tac::tic_tac {
     const EInsufficientStake: u64 = 4;
     const EGameNotWaiting: u64 = 5;
     const ENotCreator: u64 = 6;
-    const EGameNotActive: u64 = 7;
+    const EWrongGameMode: u64 = 7;
     const EAlreadyJoined: u64 = 8;
     const ECannotJoinOwnGame: u64 = 9;
+    const EGameNotActive: u64 = 10;
 
     // ======== Structs ========
     
@@ -143,7 +144,7 @@ module tic_tac::tic_tac {
     // ======== Game Creation Functions ========
     
     // Create a friendly game (no stakes)
-    public fun create_friendly_game(o: address, ctx: &mut TxContext): (String, String) {
+    public fun create_friendly_game(ctx: &mut TxContext): (String, String) {
         let game_id = object::new(ctx);
         let game_address = object::uid_to_address(&game_id);
         
@@ -159,9 +160,9 @@ module tic_tac::tic_tac {
             ],
             turn: 0,
             x: tx_context::sender(ctx),
-            o,
+            o: @0x0, // Will be set when opponent joins
             mode: MODE_FRIENDLY,
-            status: STATUS_ACTIVE,
+            status: STATUS_WAITING,
             stake_amount: 0,
             prize_pool: balance::zero(),
             creator: tx_context::sender(ctx),
@@ -232,6 +233,22 @@ module tic_tac::tic_tac {
         (game_link, viewer_link)
     }
 
+    // Join a friendly game (no stakes required)
+    public fun join_friendly_game(game: &mut Game, ctx: &mut TxContext) {
+        assert!(game.status == STATUS_WAITING, EGameNotWaiting);
+        assert!(game.mode == MODE_FRIENDLY, EWrongGameMode);
+        assert!(tx_context::sender(ctx) != game.creator, ECannotJoinOwnGame);
+
+        game.o = tx_context::sender(ctx);
+        game.status = STATUS_ACTIVE;
+
+        event::emit(GameJoined {
+            game_id: object::uid_to_address(&game.id),
+            player: tx_context::sender(ctx),
+            stake_amount: 0,
+        });
+    }
+
     // Join a competitive game
     public fun join_competitive_game(
         game: &mut Game, 
@@ -239,7 +256,7 @@ module tic_tac::tic_tac {
         ctx: &mut TxContext
     ) {
         assert!(game.status == STATUS_WAITING, EGameNotWaiting);
-        assert!(game.mode == MODE_COMPETITIVE, EGameNotActive);
+        assert!(game.mode == MODE_COMPETITIVE, EWrongGameMode);
         assert!(tx_context::sender(ctx) != game.creator, ECannotJoinOwnGame);
         assert!(coin::value(&stake) >= game.stake_amount, EInsufficientStake);
 

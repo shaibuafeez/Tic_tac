@@ -99,7 +99,7 @@ export function ShareGame({ gameLink, viewerLink, onClose }: ShareGameProps) {
           onClick={onClose}
           className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-900 transition-colors"
         >
-          Start Playing
+          Continue Waiting
         </button>
       </div>
     </div>
