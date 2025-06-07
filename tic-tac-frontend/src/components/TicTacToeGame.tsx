@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient, ConnectButton } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
 import { GameBoard } from './GameBoard';
 import { GameModeSelection } from './GameModeSelection';
 import { JoinGame } from './JoinGame';
 import { GameList } from './GameList';
 import { ShareGame } from './ShareGame';
+import { WalletButton } from './WalletButton';
+import { MyGames } from './MyGames';
 import { CONTRACT_CONFIG, GAME_CONSTANTS, GAME_MODE, GAME_STATUS } from '@/config/constants';
 import { useRouter } from 'next/navigation';
 import { useGameSync } from '@/hooks/useGameSync';
@@ -35,6 +37,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showGameList, setShowGameList] = useState(false);
+  const [showMyGames, setShowMyGames] = useState(false);
   const [showJoinGame, setShowJoinGame] = useState(false);
   const [showShareGame, setShowShareGame] = useState(false);
   const [shareLinks, setShareLinks] = useState({ gameLink: '', viewerLink: '' });
@@ -464,7 +467,43 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const resetGame = () => {
     setGameState(null);
     setShowGameList(false);
+    setShowMyGames(false);
     setShowJoinGame(false);
+  };
+
+  const cancelGame = async () => {
+    if (!account || !gameState) return;
+
+    setIsLoading(true);
+    try {
+      const transaction = new Transaction();
+      
+      transaction.moveCall({
+        target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::cancel_expired_game`,
+        arguments: [
+          transaction.object(gameState.id),
+        ],
+      });
+
+      signAndExecute(
+        { transaction },
+        {
+          onSuccess: (result) => {
+            console.log('Game cancelled:', result);
+            alert(`Game cancelled! Your ${(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI has been returned.`);
+            resetGame();
+          },
+          onError: (error) => {
+            console.error('Failed to cancel game:', error);
+            alert('Failed to cancel game. The game might have already started or been cancelled.');
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Error cancelling game:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const selectGame = (game: GameState) => {
@@ -479,28 +518,43 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
   if (!account) {
     return (
-      <div className="bg-white border-2 border-black rounded-lg p-8 text-center max-w-md mx-auto">
-        <h2 className="text-2xl font-bold text-black mb-4">
-          {gameId ? 'Join Game' : 'Connect Your Wallet'}
-        </h2>
-        <p className="text-gray-600 mb-6">
-          {gameId 
-            ? 'Connect your Sui wallet to join this tic-tac-toe game!' 
-            : 'Please connect your Sui wallet to start playing tic-tac-toe!'
-          }
-        </p>
+      <div className="bg-white border-2 border-black rounded-lg p-8 text-center max-w-md mx-auto animate-fade-in">
+        <div className="mb-6">
+          <div className="w-20 h-20 mx-auto mb-4 bg-black rounded-lg flex items-center justify-center animate-pulse">
+            <div className="text-white text-3xl font-bold">X</div>
+          </div>
+          <h2 className="text-2xl font-bold text-black mb-2">
+            {gameId ? 'Join Game' : 'Tic Tac Toe on Sui'}
+          </h2>
+          <p className="text-gray-600">
+            {gameId 
+              ? 'Connect your wallet to join this game' 
+              : 'Play competitive or friendly games on the blockchain'
+            }
+          </p>
+        </div>
+        
         {gameId && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800 mb-2">
-              <strong>You&apos;ve been invited to a game!</strong>
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg animate-fade-in">
+            <p className="text-sm text-blue-800 mb-2 font-semibold">
+              🎮 You&apos;ve been invited to a game!
             </p>
-            <p className="text-xs text-blue-600">
-              Game ID: {gameId.slice(0, 8)}...{gameId.slice(-8)}
+            <p className="text-xs text-blue-600 font-mono">
+              {gameId.slice(0, 8)}...{gameId.slice(-8)}
             </p>
           </div>
         )}
+        
         <div className="flex justify-center">
-          <ConnectButton className="!bg-black !text-white hover:!bg-gray-800 !border-black !rounded-lg !px-6 !py-3 !font-medium" />
+          <WalletButton />
+        </div>
+        
+        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-500">
+          <span>Built on Sui</span>
+          <span>•</span>
+          <span>Win NFT Trophies</span>
+          <span>•</span>
+          <span>Stake & Earn</span>
         </div>
       </div>
     );
@@ -516,6 +570,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           mode={gameState.mode}
           onJoin={gameState.mode === GAME_MODE.COMPETITIVE ? joinCompetitiveGame : joinFriendlyGame}
           onCancel={resetGame}
+          onCancelGame={cancelGame}
           isLoading={isLoading}
           currentPlayer={account.address}
         />
@@ -524,6 +579,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
             gameLink={shareLinks.gameLink}
             viewerLink={shareLinks.viewerLink}
             onClose={() => setShowShareGame(false)}
+            stakeAmount={gameState.stakeAmount}
+            mode={gameState.mode}
           />
         )}
       </>
@@ -531,6 +588,16 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   }
 
   if (!gameState) {
+    if (showMyGames) {
+      return (
+        <MyGames
+          currentPlayer={account.address}
+          onSelectGame={selectGame}
+          onBack={() => setShowMyGames(false)}
+        />
+      );
+    }
+
     if (showGameList) {
       return (
         <div className="space-y-4">
@@ -555,12 +622,20 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           isLoading={isLoading}
           currentPlayer={account.address}
         />
-        <button
-          onClick={() => setShowGameList(true)}
-          className="w-full max-w-md mx-auto block text-center py-2 text-gray-600 hover:text-black transition-colors"
-        >
-          Or browse existing games →
-        </button>
+        <div className="max-w-md mx-auto space-y-2">
+          <button
+            onClick={() => setShowMyGames(true)}
+            className="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+          >
+            📋 My Games
+          </button>
+          <button
+            onClick={() => setShowGameList(true)}
+            className="w-full py-2 text-gray-600 hover:text-black transition-colors"
+          >
+            Or browse existing games →
+          </button>
+        </div>
       </div>
     );
   }
@@ -571,6 +646,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         gameState={gameState}
         onMakeMove={makeMove}
         onResetGame={resetGame}
+        onHome={resetGame}
+        onCancelGame={cancelGame}
         isLoading={isLoading}
         currentPlayer={account.address}
       />
@@ -580,6 +657,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           gameLink={shareLinks.gameLink}
           viewerLink={shareLinks.viewerLink}
           onClose={() => setShowShareGame(false)}
+          stakeAmount={gameState.stakeAmount}
+          mode={gameState.mode}
         />
       )}
     </>
