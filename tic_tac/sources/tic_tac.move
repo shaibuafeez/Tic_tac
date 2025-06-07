@@ -6,6 +6,7 @@ module tic_tac::tic_tac {
     use sui::sui::SUI;
     use sui::balance::{Self, Balance};
     use sui::event;
+    use sui::clock::{Self, Clock};
     use std::vector;
     use std::string::{Self, String};
 
@@ -29,7 +30,7 @@ module tic_tac::tic_tac {
     const BPS_BASE: u64 = 10000;
     
     // Timeout constants
-    const MOVE_TIMEOUT_EPOCHS: u64 = 3600; // 1 hour timeout
+    const MOVE_TIMEOUT_MS: u64 = 3_600_000; // 1 hour in milliseconds
 
     // ======== Errors ========
     const EInvalidTurn: u64 = 0;
@@ -75,9 +76,9 @@ module tic_tac::tic_tac {
         winner: address,
         game_link: String,
         viewer_link: String,
-        created_at: u64,
-        completed_at: u64,
-        last_move_epoch: u64,
+        created_at_ms: u64,
+        completed_at_ms: u64,
+        last_move_ms: u64,
     }
 
     // Trophy NFT
@@ -157,12 +158,14 @@ module tic_tac::tic_tac {
     // ======== Game Creation Functions ========
     
     // Create a friendly game (no stakes)
-    public fun create_friendly_game(ctx: &mut TxContext): (String, String) {
+    public fun create_friendly_game(clock: &Clock, ctx: &mut TxContext): (String, String) {
         let game_id = object::new(ctx);
         let game_address = object::uid_to_address(&game_id);
         
         let game_link = generate_game_link(game_address, false);
         let viewer_link = generate_game_link(game_address, true);
+        
+        let current_time = clock::timestamp_ms(clock);
         
         let game = Game {
             id: game_id,
@@ -182,9 +185,9 @@ module tic_tac::tic_tac {
             winner: @0x0,
             game_link,
             viewer_link,
-            created_at: tx_context::epoch(ctx),
-            completed_at: 0,
-            last_move_epoch: tx_context::epoch(ctx),
+            created_at_ms: current_time,
+            completed_at_ms: 0,
+            last_move_ms: current_time,
         };
 
         event::emit(GameCreated {
@@ -203,6 +206,7 @@ module tic_tac::tic_tac {
     // Create a competitive game (with stakes)
     public fun create_competitive_game(
         stake: Coin<SUI>, 
+        clock: &Clock,
         ctx: &mut TxContext
     ): (String, String) {
         let stake_amount = coin::value(&stake);
@@ -211,6 +215,8 @@ module tic_tac::tic_tac {
         
         let game_link = generate_game_link(game_address, false);
         let viewer_link = generate_game_link(game_address, true);
+        
+        let current_time = clock::timestamp_ms(clock);
         
         let game = Game {
             id: game_id,
@@ -230,9 +236,9 @@ module tic_tac::tic_tac {
             winner: @0x0,
             game_link,
             viewer_link,
-            created_at: tx_context::epoch(ctx),
-            completed_at: 0,
-            last_move_epoch: tx_context::epoch(ctx),
+            created_at_ms: current_time,
+            completed_at_ms: 0,
+            last_move_ms: current_time,
         };
 
         event::emit(GameCreated {
@@ -249,14 +255,14 @@ module tic_tac::tic_tac {
     }
 
     // Join a friendly game (no stakes required)
-    public fun join_friendly_game(game: &mut Game, ctx: &mut TxContext) {
+    public fun join_friendly_game(game: &mut Game, clock: &Clock, ctx: &mut TxContext) {
         assert!(game.status == STATUS_WAITING, EGameNotWaiting);
         assert!(game.mode == MODE_FRIENDLY, EWrongGameMode);
         assert!(tx_context::sender(ctx) != game.creator, ECannotJoinOwnGame);
 
         game.o = tx_context::sender(ctx);
         game.status = STATUS_ACTIVE;
-        game.last_move_epoch = tx_context::epoch(ctx); // Start timeout tracking
+        game.last_move_ms = clock::timestamp_ms(clock); // Start timeout tracking
 
         event::emit(GameJoined {
             game_id: object::uid_to_address(&game.id),
@@ -269,6 +275,7 @@ module tic_tac::tic_tac {
     public fun join_competitive_game(
         game: &mut Game, 
         stake: Coin<SUI>, 
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
         assert!(game.status == STATUS_WAITING, EGameNotWaiting);
@@ -278,7 +285,7 @@ module tic_tac::tic_tac {
 
         game.o = tx_context::sender(ctx);
         game.status = STATUS_ACTIVE;
-        game.last_move_epoch = tx_context::epoch(ctx); // Start timeout tracking
+        game.last_move_ms = clock::timestamp_ms(clock); // Start timeout tracking
         
         let stake_balance = coin::into_balance(stake);
         balance::join(&mut game.prize_pool, stake_balance);
@@ -292,7 +299,14 @@ module tic_tac::tic_tac {
 
     // ======== Game Play Functions ========
     
-    public fun place_mark(game: &mut Game, treasury: &mut Treasury, row: u8, col: u8, ctx: &mut TxContext) {
+    public fun place_mark(
+        game: &mut Game, 
+        treasury: &mut Treasury, 
+        clock: &Clock,
+        row: u8, 
+        col: u8, 
+        ctx: &mut TxContext
+    ) {
         assert!(game.status == STATUS_ACTIVE, EGameNotActive);
         assert!(row < 3 && col < 3, EInvalidLocation);
         
@@ -306,8 +320,8 @@ module tic_tac::tic_tac {
         let mark = if (game.turn % 2 == 0) { MARK_X } else { MARK_O };
         *vector::borrow_mut(&mut game.board, index) = mark;
         
-        // Update last move epoch for timeout tracking
-        game.last_move_epoch = tx_context::epoch(ctx);
+        // Update last move time for timeout tracking
+        game.last_move_ms = clock::timestamp_ms(clock);
         
         event::emit(MoveMade {
             game_id: object::uid_to_address(&game.id),
@@ -320,7 +334,7 @@ module tic_tac::tic_tac {
         if (check_winner(&game.board)) {
             game.winner = current_player;
             game.status = STATUS_COMPLETED;
-            game.completed_at = tx_context::epoch(ctx);
+            game.completed_at_ms = clock::timestamp_ms(clock);
             
             if (game.mode == MODE_COMPETITIVE) {
                 distribute_prizes(game, treasury, ctx);
@@ -329,7 +343,7 @@ module tic_tac::tic_tac {
             }
         } else if (is_draw(&game.board)) {
             game.status = STATUS_COMPLETED;
-            game.completed_at = tx_context::epoch(ctx);
+            game.completed_at_ms = clock::timestamp_ms(clock);
             
             if (game.mode == MODE_COMPETITIVE) {
                 // Return stakes to both players in case of draw
@@ -469,14 +483,15 @@ module tic_tac::tic_tac {
     public fun claim_timeout_victory(
         game: &mut Game,
         treasury: &mut Treasury,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
         assert!(game.status == STATUS_ACTIVE, EGameNotActive);
         
-        // Check if enough time has passed since last move (1 hour = 3600 epochs)
-        let current_epoch = tx_context::epoch(ctx);
-        let time_since_last_move = current_epoch - game.last_move_epoch;
-        assert!(time_since_last_move >= MOVE_TIMEOUT_EPOCHS, ETimeoutNotReached);
+        // Check if enough time has passed since last move (1 hour in milliseconds)
+        let current_time = clock::timestamp_ms(clock);
+        let time_since_last_move = current_time - game.last_move_ms;
+        assert!(time_since_last_move >= MOVE_TIMEOUT_MS, ETimeoutNotReached);
         
         // Determine who can claim victory (the player whose turn it ISN'T)
         let current_turn_player = if (game.turn % 2 == 0) { game.x } else { game.o };
@@ -489,7 +504,7 @@ module tic_tac::tic_tac {
         // Set winner to the claiming player
         game.winner = claiming_player;
         game.status = STATUS_COMPLETED;
-        game.completed_at = current_epoch;
+        game.completed_at_ms = current_time;
         
         // Distribute prizes if competitive
         if (game.mode == MODE_COMPETITIVE) {

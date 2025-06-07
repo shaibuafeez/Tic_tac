@@ -173,7 +173,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         stakeAmount: Number(fields.stake_amount) || 0,
         creator: String(fields.creator) || "",
         winner: String(fields.winner) || "",
-        lastMoveEpoch: Number(fields.last_move_epoch) || 0,
+        lastMoveEpoch: Number(fields.last_move_ms) || 0,
         gameLink: `${window.location.origin}/game/${id}`,
         viewerLink: `${window.location.origin}/view/${id}`,
       };
@@ -218,7 +218,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       if (mode === GAME_MODE.FRIENDLY) {
         transaction.moveCall({
           target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::create_friendly_game`,
-          arguments: [],
+          arguments: [transaction.object('0x6')], // Clock object
         });
       } else if (mode === GAME_MODE.COMPETITIVE && stakeAmount) {
         // Split coins for the stake
@@ -228,7 +228,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
         transaction.moveCall({
           target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::create_competitive_game`,
-          arguments: [coin],
+          arguments: [coin, transaction.object('0x6')], // Stake and Clock
         });
       }
 
@@ -355,7 +355,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
       transaction.moveCall({
         target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::join_friendly_game`,
-        arguments: [transaction.object(gameState.id)],
+        arguments: [transaction.object(gameState.id), transaction.object('0x6')], // Game and Clock
       });
 
       signAndExecute(
@@ -413,7 +413,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
       transaction.moveCall({
         target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::join_competitive_game`,
-        arguments: [transaction.object(gameState.id), coin],
+        arguments: [transaction.object(gameState.id), coin, transaction.object('0x6')], // Game, Stake, and Clock
       });
 
       signAndExecute(
@@ -481,6 +481,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         arguments: [
           transaction.object(gameState.id),
           transaction.object(CONTRACT_CONFIG.TREASURY_ID),
+          transaction.object('0x6'), // Clock
           transaction.pure.u8(row),
           transaction.pure.u8(col),
         ],
@@ -635,6 +636,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         arguments: [
           transaction.object(gameState.id),
           transaction.object(CONTRACT_CONFIG.TREASURY_ID),
+          transaction.object('0x6'), // Clock
         ],
       });
 

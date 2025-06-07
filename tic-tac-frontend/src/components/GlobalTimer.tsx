@@ -36,8 +36,9 @@ export function GlobalTimer() {
       games.forEach((game) => {
         if (game.status !== GAME_STATUS.ACTIVE || !game.lastMoveEpoch) return;
 
-        // Calculate using blockchain epoch time (both in seconds)
-        const timeSinceLastMove = currentBlockchainTime - game.lastMoveEpoch;
+        // Convert lastMoveEpoch from milliseconds to seconds
+        const lastMoveInSeconds = game.lastMoveEpoch ? Math.floor(game.lastMoveEpoch / 1000) : currentBlockchainTime;
+        const timeSinceLastMove = currentBlockchainTime - lastMoveInSeconds;
         const timeRemaining = Math.max(0, oneHour - timeSinceLastMove);
 
         // Only include games with less than 10 minutes remaining

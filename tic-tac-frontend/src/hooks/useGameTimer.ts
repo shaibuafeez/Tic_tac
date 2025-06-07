@@ -3,7 +3,7 @@ import { GAME_STATUS } from '@/config/constants';
 
 interface UseGameTimerProps {
   gameStatus: number;
-  lastMoveEpoch?: number; // Blockchain epoch in seconds
+  lastMoveEpoch?: number; // Blockchain timestamp in milliseconds
   timeoutDuration?: number; // Duration in seconds (default 1 hour)
 }
 
@@ -42,30 +42,25 @@ export function useGameTimer({
   // Convert to blockchain epoch (seconds)
   const currentBlockchainTime = Math.floor(currentTime / 1000);
 
-  // Calculate time remaining using blockchain epochs (seconds)
+  // Calculate time remaining
   let timeRemaining = timeoutDuration; // Default to full duration
   
-  console.log('Timer render:', {
-    gameStatus,
-    lastMoveEpoch,
-    currentBlockchainTime,
-    hasValidEpoch: lastMoveEpoch && lastMoveEpoch > 0
-  });
-  
   if (lastMoveEpoch && lastMoveEpoch > 0) {
-    // If we have a valid lastMoveEpoch, calculate actual time remaining
-    const timeElapsed = currentBlockchainTime - lastMoveEpoch;
+    // Convert lastMoveEpoch from milliseconds to seconds
+    const lastMoveInSeconds = Math.floor(lastMoveEpoch / 1000);
+    const timeElapsed = currentBlockchainTime - lastMoveInSeconds;
     timeRemaining = Math.max(0, timeoutDuration - timeElapsed);
     
-    console.log('Timer calculation:', {
-      lastMoveEpoch,
-      currentBlockchainTime,
-      timeElapsed,
-      timeRemaining,
-      formattedTime: `${Math.floor(timeRemaining / 60)}:${(timeRemaining % 60).toString().padStart(2, '0')}`
-    });
-  } else {
-    console.log('No valid lastMoveEpoch, showing default:', timeoutDuration);
+    // Debug logging
+    if (gameStatus === GAME_STATUS.ACTIVE) {
+      console.log('Timer:', {
+        lastMoveMs: lastMoveEpoch,
+        lastMoveSec: lastMoveInSeconds,
+        currentSec: currentBlockchainTime,
+        elapsed: timeElapsed,
+        remaining: timeRemaining,
+      });
+    }
   }
   
   const isExpired = timeRemaining === 0;

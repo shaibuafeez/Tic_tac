@@ -51,7 +51,7 @@ export function useGameSync({
           turn: fields.turn,
           status: fields.status,
           winner: fields.winner,
-          last_move_epoch: fields.last_move_epoch,
+          last_move_ms: fields.last_move_ms,
         });
 
         // Only update if state has changed
@@ -75,7 +75,7 @@ export function useGameSync({
             stakeAmount: Number(fields.stake_amount) || 0,
             creator: String(fields.creator) || '',
             winner: String(fields.winner) || '',
-            lastMoveEpoch: Number(fields.last_move_epoch) || 0,
+            lastMoveEpoch: Number(fields.last_move_ms) || 0,
             gameLink: `${window.location.origin}/game/${gameId}`,
             viewerLink: `${window.location.origin}/view/${gameId}`,
           };
