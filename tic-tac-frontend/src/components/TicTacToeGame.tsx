@@ -504,7 +504,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
               ...gameState,
               board: newBoard,
               turn: gameState.turn + 1,
-              lastMoveEpoch: Math.floor(Date.now() / 1000), // Current epoch for immediate UI update
+              lastMoveEpoch: Math.floor(Date.now() / 1000), // Current blockchain epoch in seconds
             });
           },
           onError: (error) => {
@@ -574,7 +574,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       const currentBlockchainTime = Math.floor(Date.now() / 1000); // Convert to seconds (epoch format)
       const lastMoveEpoch = gameState.lastMoveEpoch || 0;
       const timeElapsedEpochs = currentBlockchainTime - lastMoveEpoch;
-      const oneHourInEpochs = 3600; // 1 hour = 3600 seconds
+      const oneHourInEpochs = 3600; // 1 hour = 3600 seconds (matches MOVE_TIMEOUT_EPOCHS)
       
       console.log("Debug timeout claim:", {
         currentBlockchainTime,
@@ -587,6 +587,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         isPlayerX: gameState.x === account.address,
         isPlayerO: gameState.o === account.address,
         currentTurnPlayer: gameState.turn % 2 === 0 ? gameState.x : gameState.o,
+        note: "All times synchronized with blockchain epochs",
       });
 
       // First check if we have valid epoch data
@@ -605,7 +606,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       if (timeElapsedEpochs < oneHourInEpochs) {
         const remainingSeconds = oneHourInEpochs - timeElapsedEpochs;
         const remainingMinutes = Math.ceil(remainingSeconds / 60);
-        alert(`Timeout not reached yet. Please wait ${remainingMinutes} more minutes.`);
+        alert(`Timeout not reached yet. Please wait ${remainingMinutes} more minutes. (${remainingSeconds} seconds remaining)`);
         return;
       }
 

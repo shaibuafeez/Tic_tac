@@ -3,8 +3,8 @@ import { GAME_STATUS } from '@/config/constants';
 
 interface UseGameTimerProps {
   gameStatus: number;
-  lastMoveTime?: number; // Unix timestamp in milliseconds
-  timeoutDuration?: number; // Duration in milliseconds (default 1 hour)
+  lastMoveEpoch?: number; // Blockchain epoch in seconds
+  timeoutDuration?: number; // Duration in seconds (default 1 hour)
 }
 
 interface UseGameTimerReturn {
@@ -13,53 +13,51 @@ interface UseGameTimerReturn {
   isWarning: boolean; // True when less than 5 minutes remaining
   canClaimTimeout: boolean;
   formattedTime: string;
+  currentBlockchainTime: number; // Current blockchain time for debugging
 }
 
 export function useGameTimer({
   gameStatus,
-  lastMoveTime,
-  timeoutDuration = 60 * 60 * 1000, // 1 hour in milliseconds
+  lastMoveEpoch,
+  timeoutDuration = 3600, // 1 hour in seconds (matching blockchain MOVE_TIMEOUT_EPOCHS)
 }: UseGameTimerProps): UseGameTimerReturn {
-  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [currentBlockchainTime, setCurrentBlockchainTime] = useState(Math.floor(Date.now() / 1000));
 
   useEffect(() => {
-    if (gameStatus !== GAME_STATUS.ACTIVE || !lastMoveTime) {
+    if (gameStatus !== GAME_STATUS.ACTIVE || !lastMoveEpoch) {
       return;
     }
 
     const interval = setInterval(() => {
-      setCurrentTime(Date.now());
+      // Use current time in seconds to match blockchain epoch format
+      setCurrentBlockchainTime(Math.floor(Date.now() / 1000));
     }, 1000); // Update every second
 
     return () => clearInterval(interval);
-  }, [gameStatus, lastMoveTime]);
+  }, [gameStatus, lastMoveEpoch]);
 
-  // Handle case where lastMoveTime might be in seconds (blockchain epoch) vs milliseconds (Date.now())
-  // If lastMoveTime is from blockchain, it's in seconds, so we convert to milliseconds
-  const lastMoveTimeMs = lastMoveTime || 0;
-  
-  const timeElapsed = lastMoveTimeMs ? currentTime - lastMoveTimeMs : 0;
+  // Calculate time remaining using blockchain epochs (seconds)
+  const timeElapsed = lastMoveEpoch ? currentBlockchainTime - lastMoveEpoch : 0;
   const timeRemaining = Math.max(0, timeoutDuration - timeElapsed);
   const isExpired = timeRemaining === 0;
-  const isWarning = timeRemaining > 0 && timeRemaining <= 5 * 60 * 1000; // Last 5 minutes
+  const isWarning = timeRemaining > 0 && timeRemaining <= 5 * 60; // Last 5 minutes
   
-  // Only allow claiming timeout if truly expired AND enough time has passed for blockchain
-  // Add a small buffer to account for blockchain vs frontend time differences
-  const bufferTime = 30 * 1000; // 30 second buffer
-  const canClaimTimeout = (timeRemaining <= bufferTime) && gameStatus === GAME_STATUS.ACTIVE;
+  // Only allow claiming timeout if expired AND we have valid epoch data
+  const canClaimTimeout = isExpired && gameStatus === GAME_STATUS.ACTIVE && !!lastMoveEpoch;
 
   // Format time as MM:SS
-  const minutes = Math.floor(timeRemaining / 60000);
-  const seconds = Math.floor((timeRemaining % 60000) / 1000);
+  const minutes = Math.floor(timeRemaining / 60);
+  const seconds = timeRemaining % 60;
   const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds
     .toString()
     .padStart(2, '0')}`;
 
   return {
-    timeRemaining: Math.floor(timeRemaining / 1000), // Return in seconds
+    timeRemaining,
     isExpired,
     isWarning,
     canClaimTimeout,
     formattedTime,
+    currentBlockchainTime,
   };
 }

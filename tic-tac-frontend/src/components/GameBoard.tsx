@@ -63,10 +63,10 @@ export function GameBoard({
     }
   }, [gameState.status, gameState.lastMoveEpoch, lastMoveTime]);
 
-  // Use the game timer hook
+  // Use the game timer hook with blockchain epoch
   const { formattedTime, isExpired, isWarning, canClaimTimeout } = useGameTimer({
     gameStatus: gameState.status,
-    lastMoveTime: lastMoveTime || undefined,
+    lastMoveEpoch: gameState.lastMoveEpoch,
   });
 
   // Update local state when prop changes

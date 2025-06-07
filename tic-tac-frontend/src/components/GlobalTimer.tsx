@@ -30,19 +30,18 @@ export function GlobalTimer() {
       
       // Find games with timeout risk
       const gameTimers: GameTimer[] = [];
-      const now = Date.now();
-      const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+      const currentBlockchainTime = Math.floor(Date.now() / 1000); // Current time in seconds (blockchain epoch format)
+      const oneHour = 3600; // 1 hour in seconds
 
       games.forEach((game) => {
         if (game.status !== GAME_STATUS.ACTIVE || !game.lastMoveEpoch) return;
 
-        // Convert epoch to milliseconds (Sui epochs are in seconds)
-        const lastMoveTime = game.lastMoveEpoch * 1000;
-        const timeSinceLastMove = now - lastMoveTime;
+        // Calculate using blockchain epoch time (both in seconds)
+        const timeSinceLastMove = currentBlockchainTime - game.lastMoveEpoch;
         const timeRemaining = Math.max(0, oneHour - timeSinceLastMove);
 
         // Only include games with less than 10 minutes remaining
-        if (timeRemaining <= 10 * 60 * 1000) {
+        if (timeRemaining <= 10 * 60) { // 10 minutes in seconds
           const isPlayerX = game.x === account.address;
           const isPlayerO = game.o === account.address;
           const isXTurn = game.turn % 2 === 0;
@@ -50,7 +49,7 @@ export function GlobalTimer() {
           
           gameTimers.push({
             gameId: game.id,
-            timeRemaining: Math.floor(timeRemaining / 1000), // Convert to seconds
+            timeRemaining, // Already in seconds
             isMyTurn,
             opponent: isPlayerX ? game.o : game.x,
           });
