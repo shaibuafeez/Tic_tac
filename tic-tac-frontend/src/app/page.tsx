@@ -58,6 +58,14 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <nav className="flex items-center gap-4">
+              {account && (
+                <Link
+                  href="/pending"
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all text-black"
+                >
+{t("pendingMoves")}
+                </Link>
+              )}
               <Link
                 href="/leaderboard"
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all text-black"

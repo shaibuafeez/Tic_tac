@@ -86,9 +86,8 @@ export function GlobalTimer() {
   };
 
   const handleClick = () => {
-    if (urgentGame) {
-      router.push(`/game/${urgentGame.gameId}`);
-    }
+    // Navigate to pending moves page instead of specific game
+    router.push('/pending');
   };
 
   if (!account || !urgentGame) {
@@ -110,12 +109,10 @@ export function GlobalTimer() {
       } hover:shadow-md`}
       title={
         isExpired
-          ? urgentGame.isMyTurn
-            ? "Your opponent can claim timeout victory!"
-            : "You can claim timeout victory!"
+          ? "⚠️ Urgent! Click to view all pending moves"
           : urgentGame.isMyTurn
-          ? `Your turn - ${formatTime(urgentGame.timeRemaining)} remaining`
-          : `Opponent's turn - ${formatTime(urgentGame.timeRemaining)} until you can claim victory`
+          ? `🎮 Your turn - ${formatTime(urgentGame.timeRemaining)} remaining. Click to view all pending moves.`
+          : `⏰ ${formatTime(urgentGame.timeRemaining)} until timeout. Click to view all pending moves.`
       }
     >
       {isExpired ? (
