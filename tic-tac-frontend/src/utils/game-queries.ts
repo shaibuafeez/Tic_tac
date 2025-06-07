@@ -75,6 +75,7 @@ export async function getUserGames(
         stake_amount?: number;
         creator?: string;
         winner?: string;
+        last_move_epoch?: number;
       };
       const gameId = obj.objectId;
       
@@ -100,6 +101,7 @@ export async function getUserGames(
         stakeAmount: Number(fields.stake_amount) || 0,
         creator: String(fields.creator) || '',
         winner: String(fields.winner) || '',
+        lastMoveEpoch: Number(fields.last_move_epoch) || 0,
         gameLink: `${window.location.origin}/game/${gameId}`,
         viewerLink: `${window.location.origin}/view/${gameId}`,
       });
@@ -161,6 +163,7 @@ export async function getAllActiveGames(suiClient: SuiClient): Promise<GameState
         stake_amount?: number;
         creator?: string;
         winner?: string;
+        last_move_epoch?: number;
       };
       const gameId = obj.objectId;
       
@@ -183,6 +186,7 @@ export async function getAllActiveGames(suiClient: SuiClient): Promise<GameState
         stakeAmount: Number(fields.stake_amount) || 0,
         creator: String(fields.creator) || '',
         winner: String(fields.winner) || '',
+        lastMoveEpoch: Number(fields.last_move_epoch) || 0,
         gameLink: `${window.location.origin}/game/${gameId}`,
         viewerLink: `${window.location.origin}/view/${gameId}`,
       });

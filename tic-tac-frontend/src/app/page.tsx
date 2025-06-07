@@ -8,6 +8,7 @@ import {
 } from "@mysten/dapp-kit";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { NotificationBadge } from "@/components/NotificationBadge";
+import { GlobalTimer } from "@/components/GlobalTimer";
 import { LanguageTest } from "@/components/LanguageTest";
 import { useLanguage } from "@/hooks/useLanguage";
 import { CONTRACT_CONFIG } from "@/config/constants";
@@ -72,6 +73,7 @@ export default function Home() {
                 </Link>
               )}
               <NotificationBadge />
+              <GlobalTimer />
             </nav>
             <LanguageSelector />
             <ConnectButton />

@@ -27,6 +27,8 @@ export const translations = {
     youCanClaimTimeout: 'You can claim victory due to timeout',
     claimTimeoutVictory: 'Claim Timeout Victory',
     opponentHasExceededTimeLimit: 'Your opponent has exceeded the time limit!',
+    urgentGame: 'Urgent Game',
+    timeoutRisk: 'Timeout Risk',
     
     // Game status
     waitingForOpponent: 'Waiting for opponent',
@@ -164,6 +166,8 @@ export const translations = {
     youCanClaimTimeout: 'Puedes reclamar la victoria por tiempo',
     claimTimeoutVictory: 'Reclamar Victoria por Tiempo',
     opponentHasExceededTimeLimit: '¡Tu oponente ha excedido el límite de tiempo!',
+    urgentGame: 'Juego Urgente',
+    timeoutRisk: 'Riesgo de Tiempo',
     
     // Game status
     waitingForOpponent: 'Esperando oponente',
@@ -301,6 +305,8 @@ export const translations = {
     youCanClaimTimeout: '您可以因超时而宣告胜利',
     claimTimeoutVictory: '宣告超时胜利',
     opponentHasExceededTimeLimit: '您的对手已超过时间限制！',
+    urgentGame: '紧急游戏',
+    timeoutRisk: '超时风险',
     
     // Game status
     waitingForOpponent: '等待对手',

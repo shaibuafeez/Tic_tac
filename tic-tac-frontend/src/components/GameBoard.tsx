@@ -47,23 +47,21 @@ export function GameBoard({
   const [showConfetti, setShowConfetti] = useState(false);
   const [lastMoveTime, setLastMoveTime] = useState<number | null>(null);
   const prevBoardRef = useRef(initialGameState.board);
-  const prevTurnRef = useRef(initialGameState.turn);
   const { board, turn, x, o } = gameState;
 
-  // Initialize timer when game becomes active and reset on each move
+  // Use blockchain timestamp for accurate timer
   useEffect(() => {
-    if (gameState.status === GAME_STATUS.ACTIVE) {
-      // Set initial time when game starts
+    if (gameState.status === GAME_STATUS.ACTIVE && gameState.lastMoveEpoch) {
+      // Convert epoch (seconds) to milliseconds for accurate timer
+      const blockchainTime = gameState.lastMoveEpoch * 1000;
+      setLastMoveTime(blockchainTime);
+    } else if (gameState.status === GAME_STATUS.ACTIVE && !gameState.lastMoveEpoch) {
+      // Fallback for local games or missing blockchain data
       if (!lastMoveTime) {
         setLastMoveTime(Date.now());
       }
-      // Reset timer when turn changes (new move made)
-      else if (turn !== prevTurnRef.current) {
-        setLastMoveTime(Date.now());
-        prevTurnRef.current = turn;
-      }
     }
-  }, [gameState.status, turn, lastMoveTime]);
+  }, [gameState.status, gameState.lastMoveEpoch, lastMoveTime]);
 
   // Use the game timer hook
   const { formattedTime, isExpired, isWarning, canClaimTimeout } = useGameTimer({

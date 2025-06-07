@@ -35,6 +35,7 @@ export interface GameState {
   stakeAmount: number;
   creator: string;
   winner: string;
+  lastMoveEpoch?: number;
   gameLink?: string;
   viewerLink?: string;
 }
@@ -172,6 +173,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         stakeAmount: Number(fields.stake_amount) || 0,
         creator: String(fields.creator) || "",
         winner: String(fields.winner) || "",
+        lastMoveEpoch: Number(fields.last_move_epoch) || 0,
         gameLink: `${window.location.origin}/game/${id}`,
         viewerLink: `${window.location.origin}/view/${id}`,
       };
@@ -317,6 +319,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
               stakeAmount: stakeAmount || 0,
               creator: account.address,
               winner: "",
+              lastMoveEpoch: Math.floor(Date.now() / 1000), // Set creation time
               gameLink,
               viewerLink,
             });
@@ -501,6 +504,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
               ...gameState,
               board: newBoard,
               turn: gameState.turn + 1,
+              lastMoveEpoch: Math.floor(Date.now() / 1000), // Current epoch for immediate UI update
             });
           },
           onError: (error) => {
@@ -565,6 +569,46 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const claimTimeoutVictory = async () => {
     if (!account || !gameState) return;
 
+    // Debug timing information
+    const currentEpochMs = Date.now();
+    const lastMoveEpochMs = gameState.lastMoveEpoch ? gameState.lastMoveEpoch * 1000 : 0;
+    const timeElapsedMs = currentEpochMs - lastMoveEpochMs;
+    const timeElapsedSeconds = Math.floor(timeElapsedMs / 1000);
+    const oneHourInSeconds = 3600;
+    
+    console.log("Debug timeout claim:", {
+      currentEpochMs,
+      lastMoveEpochMs, 
+      timeElapsedMs,
+      timeElapsedSeconds,
+      oneHourInSeconds,
+      hasEnoughTimePassed: timeElapsedSeconds >= oneHourInSeconds,
+      gameState,
+      currentPlayer: account.address,
+      isPlayerX: gameState.x === account.address,
+      isPlayerO: gameState.o === account.address,
+      currentTurnPlayer: gameState.turn % 2 === 0 ? gameState.x : gameState.o,
+    });
+
+    // Validate conditions before making blockchain call
+    if (timeElapsedSeconds < oneHourInSeconds) {
+      const remainingSeconds = oneHourInSeconds - timeElapsedSeconds;
+      const remainingMinutes = Math.ceil(remainingSeconds / 60);
+      alert(`Timeout not reached yet. Please wait ${remainingMinutes} more minutes.`);
+      return;
+    }
+
+    const currentTurnPlayer = gameState.turn % 2 === 0 ? gameState.x : gameState.o;
+    if (account.address === currentTurnPlayer) {
+      alert("You cannot claim timeout victory on your own turn. It's your turn to move!");
+      return;
+    }
+
+    if (gameState.x !== account.address && gameState.o !== account.address) {
+      alert("You are not a player in this game.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const transaction = new Transaction();
@@ -601,9 +645,22 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           },
           onError: (error) => {
             console.error("Failed to claim timeout victory:", error);
-            alert(
-              "Failed to claim timeout victory. The time limit might not have been reached yet."
-            );
+            
+            // Provide more specific error messages based on common failure cases
+            let errorMessage = "Failed to claim timeout victory. ";
+            if (error.toString().includes("ETimeoutNotReached")) {
+              errorMessage += "The 1-hour timeout period has not been reached yet.";
+            } else if (error.toString().includes("ECannotClaimOwnTimeout")) {
+              errorMessage += "You cannot claim timeout on your own turn.";
+            } else if (error.toString().includes("EGameNotActive")) {
+              errorMessage += "The game is not active.";
+            } else if (error.toString().includes("EInvalidTurn")) {
+              errorMessage += "You are not a valid player in this game.";
+            } else {
+              errorMessage += "Please check the game state and try again.";
+            }
+            
+            alert(errorMessage);
           },
         }
       );
