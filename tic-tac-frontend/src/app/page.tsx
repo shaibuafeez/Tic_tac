@@ -10,6 +10,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { NotificationBadge } from "@/components/NotificationBadge";
 import { GlobalTimer } from "@/components/GlobalTimer";
 import { LanguageTest } from "@/components/LanguageTest";
+import { TimerTest } from "@/components/TimerTest";
 import { useLanguage } from "@/hooks/useLanguage";
 import { CONTRACT_CONFIG } from "@/config/constants";
 import { useState, useEffect } from "react";
@@ -94,6 +95,11 @@ export default function Home() {
 
         {/* Temporary language test component */}
         <LanguageTest />
+        
+        {/* Timer test component */}
+        {process.env.NODE_ENV === 'development' && (
+          <TimerTest />
+        )}
       </div>
     </div>
   );

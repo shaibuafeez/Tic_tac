@@ -35,7 +35,7 @@ export function useGameSync({
       });
 
       if (!object.data) {
-        console.error('Game not found');
+        // Game not found - this is expected for demo/local games
         return;
       }
 
@@ -51,6 +51,7 @@ export function useGameSync({
           turn: fields.turn,
           status: fields.status,
           winner: fields.winner,
+          last_move_epoch: fields.last_move_epoch,
         });
 
         // Only update if state has changed
@@ -74,6 +75,7 @@ export function useGameSync({
             stakeAmount: Number(fields.stake_amount) || 0,
             creator: String(fields.creator) || '',
             winner: String(fields.winner) || '',
+            lastMoveEpoch: Number(fields.last_move_epoch) || 0,
             gameLink: `${window.location.origin}/game/${gameId}`,
             viewerLink: `${window.location.origin}/view/${gameId}`,
           };

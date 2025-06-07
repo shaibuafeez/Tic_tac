@@ -21,29 +21,58 @@ export function useGameTimer({
   lastMoveEpoch,
   timeoutDuration = 3600, // 1 hour in seconds (matching blockchain MOVE_TIMEOUT_EPOCHS)
 }: UseGameTimerProps): UseGameTimerReturn {
-  const [currentBlockchainTime, setCurrentBlockchainTime] = useState(Math.floor(Date.now() / 1000));
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   useEffect(() => {
-    if (gameStatus !== GAME_STATUS.ACTIVE || !lastMoveEpoch) {
+    // Only set up interval for active games
+    if (gameStatus !== GAME_STATUS.ACTIVE) {
       return;
     }
 
+    // Log initial state
+    console.log('Timer initialized:', { gameStatus, lastMoveEpoch });
+
     const interval = setInterval(() => {
-      // Use current time in seconds to match blockchain epoch format
-      setCurrentBlockchainTime(Math.floor(Date.now() / 1000));
-    }, 1000); // Update every second
+      setCurrentTime(Date.now());
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameStatus, lastMoveEpoch]);
+  }, [gameStatus]);
+
+  // Convert to blockchain epoch (seconds)
+  const currentBlockchainTime = Math.floor(currentTime / 1000);
 
   // Calculate time remaining using blockchain epochs (seconds)
-  const timeElapsed = lastMoveEpoch ? currentBlockchainTime - lastMoveEpoch : 0;
-  const timeRemaining = Math.max(0, timeoutDuration - timeElapsed);
+  let timeRemaining = timeoutDuration; // Default to full duration
+  
+  console.log('Timer render:', {
+    gameStatus,
+    lastMoveEpoch,
+    currentBlockchainTime,
+    hasValidEpoch: lastMoveEpoch && lastMoveEpoch > 0
+  });
+  
+  if (lastMoveEpoch && lastMoveEpoch > 0) {
+    // If we have a valid lastMoveEpoch, calculate actual time remaining
+    const timeElapsed = currentBlockchainTime - lastMoveEpoch;
+    timeRemaining = Math.max(0, timeoutDuration - timeElapsed);
+    
+    console.log('Timer calculation:', {
+      lastMoveEpoch,
+      currentBlockchainTime,
+      timeElapsed,
+      timeRemaining,
+      formattedTime: `${Math.floor(timeRemaining / 60)}:${(timeRemaining % 60).toString().padStart(2, '0')}`
+    });
+  } else {
+    console.log('No valid lastMoveEpoch, showing default:', timeoutDuration);
+  }
+  
   const isExpired = timeRemaining === 0;
   const isWarning = timeRemaining > 0 && timeRemaining <= 5 * 60; // Last 5 minutes
   
   // Only allow claiming timeout if expired AND we have valid epoch data
-  const canClaimTimeout = isExpired && gameStatus === GAME_STATUS.ACTIVE && !!lastMoveEpoch;
+  const canClaimTimeout = isExpired && gameStatus === GAME_STATUS.ACTIVE && !!lastMoveEpoch && lastMoveEpoch > 0;
 
   // Format time as MM:SS
   const minutes = Math.floor(timeRemaining / 60);
