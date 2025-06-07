@@ -569,48 +569,64 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const claimTimeoutVictory = async () => {
     if (!account || !gameState) return;
 
-    // Debug timing information
-    const currentEpochMs = Date.now();
-    const lastMoveEpochMs = gameState.lastMoveEpoch ? gameState.lastMoveEpoch * 1000 : 0;
-    const timeElapsedMs = currentEpochMs - lastMoveEpochMs;
-    const timeElapsedSeconds = Math.floor(timeElapsedMs / 1000);
-    const oneHourInSeconds = 3600;
-    
-    console.log("Debug timeout claim:", {
-      currentEpochMs,
-      lastMoveEpochMs, 
-      timeElapsedMs,
-      timeElapsedSeconds,
-      oneHourInSeconds,
-      hasEnoughTimePassed: timeElapsedSeconds >= oneHourInSeconds,
-      gameState,
-      currentPlayer: account.address,
-      isPlayerX: gameState.x === account.address,
-      isPlayerO: gameState.o === account.address,
-      currentTurnPlayer: gameState.turn % 2 === 0 ? gameState.x : gameState.o,
-    });
-
-    // Validate conditions before making blockchain call
-    if (timeElapsedSeconds < oneHourInSeconds) {
-      const remainingSeconds = oneHourInSeconds - timeElapsedSeconds;
-      const remainingMinutes = Math.ceil(remainingSeconds / 60);
-      alert(`Timeout not reached yet. Please wait ${remainingMinutes} more minutes.`);
-      return;
-    }
-
-    const currentTurnPlayer = gameState.turn % 2 === 0 ? gameState.x : gameState.o;
-    if (account.address === currentTurnPlayer) {
-      alert("You cannot claim timeout victory on your own turn. It's your turn to move!");
-      return;
-    }
-
-    if (gameState.x !== account.address && gameState.o !== account.address) {
-      alert("You are not a player in this game.");
-      return;
-    }
-
-    setIsLoading(true);
     try {
+      // Get current blockchain epoch to compare with game state
+      const currentBlockchainTime = Math.floor(Date.now() / 1000); // Convert to seconds (epoch format)
+      const lastMoveEpoch = gameState.lastMoveEpoch || 0;
+      const timeElapsedEpochs = currentBlockchainTime - lastMoveEpoch;
+      const oneHourInEpochs = 3600; // 1 hour = 3600 seconds
+      
+      console.log("Debug timeout claim:", {
+        currentBlockchainTime,
+        lastMoveEpoch,
+        timeElapsedEpochs,
+        oneHourInEpochs,
+        hasEnoughTimePassed: timeElapsedEpochs >= oneHourInEpochs,
+        gameState,
+        currentPlayer: account.address,
+        isPlayerX: gameState.x === account.address,
+        isPlayerO: gameState.o === account.address,
+        currentTurnPlayer: gameState.turn % 2 === 0 ? gameState.x : gameState.o,
+      });
+
+      // First check if we have valid epoch data
+      if (!lastMoveEpoch || lastMoveEpoch === 0) {
+        alert("Game timing data is invalid. Please refresh and try again.");
+        return;
+      }
+
+      // Check for potential underflow condition
+      if (currentBlockchainTime < lastMoveEpoch) {
+        alert("Timing error detected. Please refresh the page and try again.");
+        return;
+      }
+
+      // Validate conditions before making blockchain call
+      if (timeElapsedEpochs < oneHourInEpochs) {
+        const remainingSeconds = oneHourInEpochs - timeElapsedEpochs;
+        const remainingMinutes = Math.ceil(remainingSeconds / 60);
+        alert(`Timeout not reached yet. Please wait ${remainingMinutes} more minutes.`);
+        return;
+      }
+
+      const currentTurnPlayer = gameState.turn % 2 === 0 ? gameState.x : gameState.o;
+      if (account.address === currentTurnPlayer) {
+        alert("You cannot claim timeout victory on your own turn. It's your turn to move!");
+        return;
+      }
+
+      if (gameState.x !== account.address && gameState.o !== account.address) {
+        alert("You are not a player in this game.");
+        return;
+      }
+
+      // Additional validation: make sure we're not trying to claim on an empty opponent slot
+      if (gameState.o === "" || gameState.o === "0x0") {
+        alert("Game is still waiting for an opponent to join.");
+        return;
+      }
+
+      setIsLoading(true);
       const transaction = new Transaction();
 
       transaction.moveCall({
