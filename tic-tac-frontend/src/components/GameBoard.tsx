@@ -7,13 +7,15 @@ import {
   Wifi,
   Sparkles,
   Twitter,
-  Share2,
   Home,
   XCircle,
+  Clock,
 } from "lucide-react";
 import { GameState } from "./TicTacToeGame";
 import { GAME_CONSTANTS, UI_CONFIG, GAME_STATUS } from "@/config/constants";
 import { useGameSync } from "@/hooks/useGameSync";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useGameTimer } from "@/hooks/useGameTimer";
 import { useState, useEffect, useRef } from "react";
 
 interface GameBoardProps {
@@ -22,6 +24,7 @@ interface GameBoardProps {
   onResetGame: () => void;
   onHome?: () => void;
   onCancelGame?: () => void;
+  onClaimTimeoutVictory?: () => void;
   isLoading: boolean;
   currentPlayer: string;
 }
@@ -32,17 +35,41 @@ export function GameBoard({
   onResetGame,
   onHome,
   onCancelGame,
+  onClaimTimeoutVictory,
   isLoading,
   currentPlayer,
 }: GameBoardProps) {
+  const { t } = useLanguage();
   const [gameState, setGameState] = useState(initialGameState);
   const [isLive, setIsLive] = useState(false);
   const [lastMoveIndex, setLastMoveIndex] = useState<number | null>(null);
   const [winningLine, setWinningLine] = useState<number[] | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showShareButton, setShowShareButton] = useState(false);
+  const [lastMoveTime, setLastMoveTime] = useState<number | null>(null);
   const prevBoardRef = useRef(initialGameState.board);
+  const prevTurnRef = useRef(initialGameState.turn);
   const { board, turn, x, o } = gameState;
+
+  // Initialize timer when game becomes active and reset on each move
+  useEffect(() => {
+    if (gameState.status === GAME_STATUS.ACTIVE) {
+      // Set initial time when game starts
+      if (!lastMoveTime) {
+        setLastMoveTime(Date.now());
+      }
+      // Reset timer when turn changes (new move made)
+      else if (turn !== prevTurnRef.current) {
+        setLastMoveTime(Date.now());
+        prevTurnRef.current = turn;
+      }
+    }
+  }, [gameState.status, turn, lastMoveTime]);
+
+  // Use the game timer hook
+  const { formattedTime, isExpired, isWarning, canClaimTimeout } = useGameTimer({
+    gameStatus: gameState.status,
+    lastMoveTime: lastMoveTime || undefined,
+  });
 
   // Update local state when prop changes
   useEffect(() => {
@@ -121,8 +148,8 @@ export function GameBoard({
   const getCellColor = (index: number) => {
     const value = board[index];
     if (value === GAME_CONSTANTS.MARK_X) return "text-black"; // X
-    if (value === GAME_CONSTANTS.MARK_O) return "text-gray-600"; // O
-    return "text-gray-400";
+    if (value === GAME_CONSTANTS.MARK_O) return "text-black"; // O
+    return "text-black";
   };
 
   const checkWinner = () => {
@@ -273,16 +300,16 @@ export function GameBoard({
               ) : (
                 <Users className="w-6 h-6" />
               )}
-              {gameState.mode === 1 ? "Competitive Game" : "Friendly Game"}
+              {gameState.mode === 1 ? t("competitiveGame") : t("friendlyGame")}
             </h2>
             {shouldSync && (
               <div
                 className={`flex items-center gap-1 text-sm transition-colors ${
-                  isLive ? "text-green-600" : "text-gray-500"
+                  isLive ? "text-green-600" : "text-black"
                 }`}
               >
                 <Wifi className={`w-4 h-4 ${isLive ? "animate-pulse" : ""}`} />
-                <span>{isLive ? "Live" : "Connected"}</span>
+                <span>{isLive ? t("live") : t("connected")}</span>
               </div>
             )}
           </div>
@@ -298,8 +325,6 @@ export function GameBoard({
             )}
             <button
               onClick={shareGameToTwitter}
-              onMouseEnter={() => setShowShareButton(true)}
-              onMouseLeave={() => setShowShareButton(false)}
               className="p-2 text-gray-500 hover:text-[#1DA1F2] hover:bg-blue-50 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
               title="Share on Twitter"
             >
@@ -307,7 +332,7 @@ export function GameBoard({
             </button>
             <button
               onClick={onResetGame}
-              className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
               title="New Game"
             >
               <RotateCcw className="w-5 h-5" />
@@ -320,15 +345,15 @@ export function GameBoard({
             className={`p-3 rounded-lg border transition-all duration-300 ${
               currentPlayer === x
                 ? "bg-black text-white border-black animate-glow"
-                : "bg-gray-50 border-gray-200"
+                : "bg-white border-black"
             } ${turn % 2 === 0 && !gameOver ? "scale-105" : ""}`}
           >
             <div
               className={`text-sm ${
-                currentPlayer === x ? "text-gray-300" : "text-gray-600"
+                currentPlayer === x ? "text-white" : "text-black"
               }`}
             >
-              Player X
+              {t("playerX")}
             </div>
             <div
               className={`font-mono text-sm ${
@@ -338,22 +363,22 @@ export function GameBoard({
               {truncateAddress(x)}
             </div>
             {currentPlayer === x && (
-              <div className="text-xs text-gray-300 mt-1">You</div>
+              <div className="text-xs text-white mt-1">{t("you")}</div>
             )}
           </div>
           <div
             className={`p-3 rounded-lg border transition-all duration-300 ${
               currentPlayer === o
                 ? "bg-black text-white border-black animate-glow"
-                : "bg-gray-50 border-gray-200"
+                : "bg-white border-black"
             } ${turn % 2 === 1 && !gameOver ? "scale-105" : ""}`}
           >
             <div
               className={`text-sm ${
-                currentPlayer === o ? "text-gray-300" : "text-gray-600"
+                currentPlayer === o ? "text-white" : "text-black"
               }`}
             >
-              Player O
+              {t("playerO")}
             </div>
             <div
               className={`font-mono text-sm ${
@@ -363,7 +388,7 @@ export function GameBoard({
               {truncateAddress(o)}
             </div>
             {currentPlayer === o && (
-              <div className="text-xs text-gray-300 mt-1">You</div>
+              <div className="text-xs text-white mt-1">{t("you")}</div>
             )}
           </div>
         </div>
@@ -373,16 +398,65 @@ export function GameBoard({
           <div className="mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-yellow-800">
-                Prize Pool
+                {t("prizePool")}
               </span>
               <span className="text-lg font-bold text-yellow-900">
                 {((gameState.stakeAmount * 2) / 1_000_000_000).toFixed(2)} SUI
               </span>
             </div>
             <p className="text-xs text-yellow-700 mt-1">
-              Winner takes{" "}
+              {t("winnerTakes")}{" "}
               {((gameState.stakeAmount * 2 * 0.9) / 1_000_000_000).toFixed(2)}{" "}
               SUI (90%)
+            </p>
+          </div>
+        )}
+
+        {/* Timer Display for Active Games */}
+        {gameState.status === GAME_STATUS.ACTIVE && (
+          <div className={`mb-4 p-3 rounded-lg border transition-all duration-300 ${
+            isExpired 
+              ? "bg-red-50 border-red-300 animate-pulse" 
+              : isWarning
+              ? "bg-yellow-50 border-yellow-300"
+              : "bg-gray-50 border-gray-200"
+          }`}>
+            <div className="flex items-center justify-center gap-2">
+              <Clock className={`w-5 h-5 ${
+                isExpired ? "text-red-600 animate-pulse" : isWarning ? "text-yellow-600" : "text-gray-600"
+              }`} />
+              <span className={`text-sm font-medium ${
+                isExpired ? "text-red-700" : isWarning ? "text-yellow-700" : "text-gray-700"
+              }`}>
+                {isExpired ? t("timeExpired") : t("timeRemaining")}: {formattedTime}
+              </span>
+            </div>
+            {canClaimTimeout && (
+              <p className="text-xs text-red-600 mt-1 text-center">
+                {isCurrentPlayerTurn() 
+                  ? t("opponentCanClaimTimeout") 
+                  : t("youCanClaimTimeout")}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Claim Timeout Victory Button */}
+        {gameState.status === GAME_STATUS.ACTIVE && 
+         canClaimTimeout && 
+         !isCurrentPlayerTurn() && 
+         onClaimTimeoutVictory && (
+          <div className="mb-4">
+            <button
+              onClick={onClaimTimeoutVictory}
+              disabled={isLoading}
+              className="w-full py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed animate-pulse"
+            >
+              <Trophy className="w-5 h-5" />
+              {t("claimTimeoutVictory")}
+            </button>
+            <p className="text-xs text-black mt-2 text-center">
+              {t("opponentHasExceededTimeLimit")}
             </p>
           </div>
         )}
@@ -398,7 +472,7 @@ export function GameBoard({
               ? "bg-yellow-50 border-yellow-200"
               : gameState.status === GAME_STATUS.WAITING
               ? "bg-orange-50 border-orange-200"
-              : "bg-gray-50 border-gray-200"
+              : "bg-white border-black"
           }`}
         >
           {gameOver ? (
@@ -407,7 +481,9 @@ export function GameBoard({
                 {winner === currentPlayer ? (
                   <>
                     <Sparkles className="w-5 h-5 text-green-600 animate-pulse" />
-                    <span className="font-bold text-green-700">You Win!</span>
+                    <span className="font-bold text-green-700">
+                      {t("youWin")}
+                    </span>
                     <Trophy className="w-5 h-5 text-green-600 animate-bounce" />
                   </>
                 ) : (
@@ -419,27 +495,30 @@ export function GameBoard({
                 )}
               </div>
             ) : (
-              <span className="text-yellow-700 font-medium">
-                It&apos;s a Draw!
-              </span>
+              <span className="text-yellow-700 font-medium">{t("draw")}</span>
             )
           ) : gameState.status === GAME_STATUS.WAITING ? (
             <div>
-              <span className="text-orange-700 font-medium">
-                Waiting for opponent to join
+              <span className="text-orange-800 font-medium">
+                {t("waitingForOpponent")}
               </span>
-              {gameState.creator === currentPlayer && gameState.mode === 1 && gameState.stakeAmount > 0 && (
-                <p className="text-xs text-orange-600 mt-1">
-                  {((gameState.stakeAmount) / 1_000_000_000).toFixed(2)} SUI staked
-                </p>
-              )}
+              {gameState.creator === currentPlayer &&
+                gameState.mode === 1 &&
+                gameState.stakeAmount > 0 && (
+                  <p className="text-xs text-orange-700 mt-1">
+                    {(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI
+                    staked
+                  </p>
+                )}
             </div>
           ) : (
-            <span className="text-gray-600">
+            <span className="text-black">
               {isCurrentPlayerTurn() ? (
-                <span className="font-medium animate-pulse">Your turn</span>
+                <span className="font-medium animate-pulse">
+                  {t("yourTurn")}
+                </span>
               ) : (
-                `Waiting for Player ${getCurrentPlayer() === x ? "X" : "O"}`
+                t("opponentTurn")
               )}
             </span>
           )}
@@ -447,23 +526,28 @@ export function GameBoard({
       </div>
 
       {/* Cancel Button for Waiting Games */}
-      {gameState.status === GAME_STATUS.WAITING && 
-       gameState.creator === currentPlayer && 
-       onCancelGame && (
-        <div className="mb-6">
-          <button
-            onClick={onCancelGame}
-            disabled={isLoading}
-            className="w-full py-3 bg-red-50 text-red-700 border-2 border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <XCircle className="w-5 h-5" />
-            Cancel Game {gameState.mode === 1 && gameState.stakeAmount > 0 && `(Get ${(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI back)`}
-          </button>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            Cancel this game and recover your staked SUI
-          </p>
-        </div>
-      )}
+      {gameState.status === GAME_STATUS.WAITING &&
+        gameState.creator === currentPlayer &&
+        onCancelGame && (
+          <div className="mb-6">
+            <button
+              onClick={onCancelGame}
+              disabled={isLoading}
+              className="w-full py-3 bg-red-50 text-red-700 border-2 border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <XCircle className="w-5 h-5" />
+              {t("cancelGame")}{" "}
+              {gameState.mode === 1 &&
+                gameState.stakeAmount > 0 &&
+                `(${t("getSuiBack")}: ${(
+                  gameState.stakeAmount / 1_000_000_000
+                ).toFixed(2)} SUI)`}
+            </button>
+            <p className="text-xs text-black mt-2 text-center">
+              {t("cancelGameDescription")}
+            </p>
+          </div>
+        )}
 
       {/* Game Board */}
       <div className="grid grid-cols-3 gap-3 mb-6">
@@ -486,7 +570,7 @@ export function GameBoard({
                 text-4xl font-bold transition-all duration-200 relative overflow-hidden
                 ${
                   canPlay
-                    ? "game-cell hover:bg-gray-100 hover:border-gray-800 cursor-pointer hover:scale-105"
+                    ? "game-cell hover:bg-white hover:border-black cursor-pointer hover:scale-105"
                     : "cursor-not-allowed"
                 }
                 ${getCellColor(index)}
@@ -500,7 +584,7 @@ export function GameBoard({
                 {getCellContent(index)}
               </span>
               {canPlay && (
-                <span className="absolute inset-0 flex items-center justify-center text-gray-300 opacity-0 hover:opacity-100 transition-opacity">
+                <span className="absolute inset-0 flex items-center justify-center text-black opacity-0 hover:opacity-100 transition-opacity">
                   {turn % 2 === 0 ? "X" : "O"}
                 </span>
               )}
@@ -515,7 +599,7 @@ export function GameBoard({
           <div className="bg-white p-4 rounded-lg shadow-lg border-2 border-black animate-fade-in">
             <div className="flex items-center justify-center gap-2 text-black">
               <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spinner" />
-              <span className="font-medium">Processing move...</span>
+              <span className="font-medium">{t("moveProcessing")}</span>
             </div>
           </div>
         </div>

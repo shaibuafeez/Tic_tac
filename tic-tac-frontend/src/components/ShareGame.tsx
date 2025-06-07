@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Copy, Check, Share2, Eye, Users, Twitter } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ShareGameProps {
   gameLink: string;
@@ -18,12 +19,29 @@ export function ShareGame({
   stakeAmount = 0,
   mode = 0,
 }: ShareGameProps) {
+  const { t } = useLanguage();
   const [copiedGame, setCopiedGame] = useState(false);
   const [copiedViewer, setCopiedViewer] = useState(false);
 
   const copyToClipboard = async (text: string, type: "game" | "viewer") => {
     try {
-      await navigator.clipboard.writeText(text);
+      // Try using the Clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Fallback method for older browsers or non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      
       if (type === "game") {
         setCopiedGame(true);
         setTimeout(() => setCopiedGame(false), 2000);
@@ -33,6 +51,14 @@ export function ShareGame({
       }
     } catch (err) {
       console.error("Failed to copy:", err);
+      // Still show feedback even if copy failed
+      if (type === "game") {
+        setCopiedGame(true);
+        setTimeout(() => setCopiedGame(false), 2000);
+      } else {
+        setCopiedViewer(true);
+        setTimeout(() => setCopiedViewer(false), 2000);
+      }
     }
   };
 
@@ -65,27 +91,31 @@ export function ShareGame({
           <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
             <Share2 className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-black mb-2">Game Created!</h2>
-          <p className="text-gray-600">Share these links to start playing</p>
+          <h2 className="text-2xl font-bold text-black mb-2">
+            {t("gameCreated")}
+          </h2>
+          <p className="text-black">{t("shareLinksToStart")}</p>
         </div>
 
         <div className="space-y-4">
           {/* Game Link */}
-          <div className="border-2 border-gray-200 rounded-lg p-4">
+          <div className="border-2 border-black rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Users className="w-5 h-5 text-gray-600" />
-              <h3 className="font-semibold text-gray-900">For Opponents</h3>
+              <Users className="w-5 h-5 text-black" />
+              <h3 className="font-semibold text-black">{t("forOpponents")}</h3>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={gameLink}
                 readOnly
-                className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded text-sm font-mono"
+                onClick={(e) => e.currentTarget.select()}
+                className="flex-1 px-3 py-2 bg-white border border-black rounded text-sm font-mono text-black select-all cursor-text"
               />
               <button
                 onClick={() => copyToClipboard(gameLink, "game")}
-                className="p-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
+                className="p-2 bg-black text-white rounded hover:bg-gray-800 transition-colors active:scale-95"
+                title="Copy to clipboard"
               >
                 {copiedGame ? (
                   <Check className="w-5 h-5" />
@@ -94,27 +124,27 @@ export function ShareGame({
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-600 mt-2">
-              Share this link with someone to join your game
-            </p>
+            <p className="text-xs text-black mt-2">{t("shareLinkToJoin")}</p>
           </div>
 
           {/* Viewer Link */}
-          <div className="border-2 border-gray-200 rounded-lg p-4">
+          <div className="border-2 border-black rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Eye className="w-5 h-5 text-gray-600" />
-              <h3 className="font-semibold text-gray-900">For Spectators</h3>
+              <Eye className="w-5 h-5 text-black" />
+              <h3 className="font-semibold text-black">{t("forSpectators")}</h3>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={viewerLink}
                 readOnly
-                className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded text-sm font-mono"
+                onClick={(e) => e.currentTarget.select()}
+                className="flex-1 px-3 py-2 bg-white border border-black rounded text-sm font-mono text-black select-all cursor-text"
               />
               <button
                 onClick={() => copyToClipboard(viewerLink, "viewer")}
-                className="p-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
+                className="p-2 bg-black text-white rounded hover:bg-gray-800 transition-colors active:scale-95"
+                title="Copy to clipboard"
               >
                 {copiedViewer ? (
                   <Check className="w-5 h-5" />
@@ -123,9 +153,7 @@ export function ShareGame({
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-600 mt-2">
-              Share this link for people to watch the game live
-            </p>
+            <p className="text-xs text-black mt-2">{t("shareLinkToWatch")}</p>
           </div>
         </div>
 
@@ -135,13 +163,13 @@ export function ShareGame({
             className="w-full bg-[#1DA1F2] text-white py-3 rounded-lg hover:bg-[#1a8cd8] transition-all duration-200 flex items-center justify-center gap-2 modern-button"
           >
             <Twitter className="w-5 h-5" />
-            Share on Twitter
+            {t("shareOnTwitter")}
           </button>
           <button
             onClick={onClose}
-            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-900 transition-colors"
+            className="w-full bg-black text-white py-3 rounded-lg hover:bg-black transition-colors"
           >
-            Continue Waiting
+            {t("continueWaiting")}
           </button>
         </div>
       </div>

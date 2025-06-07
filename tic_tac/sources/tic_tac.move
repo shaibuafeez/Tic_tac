@@ -27,6 +27,9 @@ module tic_tac::tic_tac {
     // Platform fee (10%)
     const PLATFORM_FEE_BPS: u64 = 1000; // 10% in basis points (10/100 * 10000)
     const BPS_BASE: u64 = 10000;
+    
+    // Timeout constants
+    const MOVE_TIMEOUT_EPOCHS: u64 = 3600; // 1 hour timeout
 
     // ======== Errors ========
     const EInvalidTurn: u64 = 0;
@@ -40,6 +43,8 @@ module tic_tac::tic_tac {
     const EAlreadyJoined: u64 = 8;
     const ECannotJoinOwnGame: u64 = 9;
     const EGameNotActive: u64 = 10;
+    const ETimeoutNotReached: u64 = 11;
+    const ECannotClaimOwnTimeout: u64 = 12;
 
     // ======== Structs ========
     
@@ -72,6 +77,7 @@ module tic_tac::tic_tac {
         viewer_link: String,
         created_at: u64,
         completed_at: u64,
+        last_move_epoch: u64,
     }
 
     // Trophy NFT
@@ -116,6 +122,13 @@ module tic_tac::tic_tac {
         loser: address,
         prize_amount: u64,
         platform_fee: u64,
+    }
+
+    public struct TimeoutVictory has copy, drop {
+        game_id: address,
+        winner: address,
+        loser: address,
+        time_elapsed: u64,
     }
 
     // ======== Init Function ========
@@ -171,6 +184,7 @@ module tic_tac::tic_tac {
             viewer_link,
             created_at: tx_context::epoch(ctx),
             completed_at: 0,
+            last_move_epoch: tx_context::epoch(ctx),
         };
 
         event::emit(GameCreated {
@@ -218,6 +232,7 @@ module tic_tac::tic_tac {
             viewer_link,
             created_at: tx_context::epoch(ctx),
             completed_at: 0,
+            last_move_epoch: tx_context::epoch(ctx),
         };
 
         event::emit(GameCreated {
@@ -241,6 +256,7 @@ module tic_tac::tic_tac {
 
         game.o = tx_context::sender(ctx);
         game.status = STATUS_ACTIVE;
+        game.last_move_epoch = tx_context::epoch(ctx); // Start timeout tracking
 
         event::emit(GameJoined {
             game_id: object::uid_to_address(&game.id),
@@ -262,6 +278,7 @@ module tic_tac::tic_tac {
 
         game.o = tx_context::sender(ctx);
         game.status = STATUS_ACTIVE;
+        game.last_move_epoch = tx_context::epoch(ctx); // Start timeout tracking
         
         let stake_balance = coin::into_balance(stake);
         balance::join(&mut game.prize_pool, stake_balance);
@@ -275,7 +292,7 @@ module tic_tac::tic_tac {
 
     // ======== Game Play Functions ========
     
-    public fun place_mark(game: &mut Game, row: u8, col: u8, ctx: &mut TxContext) {
+    public fun place_mark(game: &mut Game, treasury: &mut Treasury, row: u8, col: u8, ctx: &mut TxContext) {
         assert!(game.status == STATUS_ACTIVE, EGameNotActive);
         assert!(row < 3 && col < 3, EInvalidLocation);
         
@@ -288,6 +305,9 @@ module tic_tac::tic_tac {
         
         let mark = if (game.turn % 2 == 0) { MARK_X } else { MARK_O };
         *vector::borrow_mut(&mut game.board, index) = mark;
+        
+        // Update last move epoch for timeout tracking
+        game.last_move_epoch = tx_context::epoch(ctx);
         
         event::emit(MoveMade {
             game_id: object::uid_to_address(&game.id),
@@ -303,7 +323,7 @@ module tic_tac::tic_tac {
             game.completed_at = tx_context::epoch(ctx);
             
             if (game.mode == MODE_COMPETITIVE) {
-                distribute_prizes(game, ctx);
+                distribute_prizes(game, treasury, ctx);
             } else {
                 create_trophy(game, ctx);
             }
@@ -322,15 +342,17 @@ module tic_tac::tic_tac {
 
     // ======== Prize Distribution Functions ========
     
-    fun distribute_prizes(game: &mut Game, ctx: &mut TxContext) {
+    fun distribute_prizes(game: &mut Game, treasury: &mut Treasury, ctx: &mut TxContext) {
         let total_prize = balance::value(&game.prize_pool);
         let platform_fee = (total_prize * PLATFORM_FEE_BPS) / BPS_BASE;
         let winner_prize = total_prize - platform_fee;
         
-        // For now, we'll skip the treasury transfer (would need dynamic field access in production)
-        // In production, you'd store treasury ID and use dynamic object field
+        // Transfer platform fee to treasury
+        let fee_balance = balance::split(&mut game.prize_pool, platform_fee);
+        balance::join(&mut treasury.balance, fee_balance);
+        treasury.total_fees_collected = treasury.total_fees_collected + platform_fee;
         
-        // Transfer all to winner (in production, platform fee would go to treasury)
+        // Transfer remaining prize to winner
         let winner_coin = coin::from_balance(balance::withdraw_all(&mut game.prize_pool), ctx);
         transfer::public_transfer(winner_coin, game.winner);
         
@@ -442,6 +464,49 @@ module tic_tac::tic_tac {
     }
 
 
+    // ======== Timeout Functions ========
+    
+    public fun claim_timeout_victory(
+        game: &mut Game,
+        treasury: &mut Treasury,
+        ctx: &mut TxContext
+    ) {
+        assert!(game.status == STATUS_ACTIVE, EGameNotActive);
+        
+        // Check if enough time has passed since last move (1 hour = 3600 epochs)
+        let current_epoch = tx_context::epoch(ctx);
+        let time_since_last_move = current_epoch - game.last_move_epoch;
+        assert!(time_since_last_move >= MOVE_TIMEOUT_EPOCHS, ETimeoutNotReached);
+        
+        // Determine who can claim victory (the player whose turn it ISN'T)
+        let current_turn_player = if (game.turn % 2 == 0) { game.x } else { game.o };
+        let claiming_player = tx_context::sender(ctx);
+        
+        // The player who is waiting for their opponent can claim victory
+        assert!(claiming_player == game.x || claiming_player == game.o, EInvalidTurn);
+        assert!(claiming_player != current_turn_player, ECannotClaimOwnTimeout);
+        
+        // Set winner to the claiming player
+        game.winner = claiming_player;
+        game.status = STATUS_COMPLETED;
+        game.completed_at = current_epoch;
+        
+        // Distribute prizes if competitive
+        if (game.mode == MODE_COMPETITIVE) {
+            distribute_prizes(game, treasury, ctx);
+        } else {
+            create_trophy(game, ctx);
+        };
+        
+        // Emit timeout victory event
+        event::emit(TimeoutVictory {
+            game_id: object::uid_to_address(&game.id),
+            winner: claiming_player,
+            loser: current_turn_player,
+            time_elapsed: time_since_last_move,
+        });
+    }
+
     // ======== Admin Functions ========
     
     public fun withdraw_fees(
@@ -469,5 +534,15 @@ module tic_tac::tic_tac {
         };
         
         game.status = STATUS_CANCELLED;
+    }
+
+    // ======== View Functions ========
+    
+    public fun get_treasury_balance(treasury: &Treasury): u64 {
+        balance::value(&treasury.balance)
+    }
+    
+    public fun get_total_fees_collected(treasury: &Treasury): u64 {
+        treasury.total_fees_collected
     }
 }

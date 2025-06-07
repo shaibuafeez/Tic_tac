@@ -227,6 +227,92 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+/* Flashy Wallet Connect Button */
+.wallet-connect-button-flashy {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%) !important;
+  background-size: 200% 200% !important;
+  animation: gradient-shift 3s ease infinite !important;
+  color: white !important;
+  border: 2px solid #60a5fa !important;
+  border-radius: 16px !important;
+  padding: 20px 40px !important;
+  font-weight: 700 !important;
+  font-size: 20px !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5) !important;
+  min-width: 250px !important;
+  text-transform: none !important;
+}
+
+.wallet-connect-button-flashy::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #ff0080, #ff8c00, #ffd700, #00ff88, #00ffff, #ff0080);
+  border-radius: 16px;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  animation: rainbow-border 3s linear infinite;
+  background-size: 400% 400%;
+}
+
+.wallet-connect-button-flashy:hover::before {
+  opacity: 1;
+}
+
+.wallet-connect-button-flashy:hover {
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.6) !important;
+  border-color: #a78bfa !important;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #60a5fa 100%) !important;
+}
+
+.wallet-connect-button-flashy:active {
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4) !important;
+}
+
+/* Override any dark theme or default styles */
+.wallet-connect-button-flashy button,
+.wallet-connect-button-flashy > div {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  padding: 0 !important;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes rainbow-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 /* Loading States */
 .loading-overlay {
   background: rgba(255, 255, 255, 0.9);

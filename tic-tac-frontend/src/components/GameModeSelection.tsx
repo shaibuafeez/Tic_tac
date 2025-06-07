@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Users, Trophy, Loader2, AlertCircle } from 'lucide-react';
-import { GAME_MODE } from '@/config/constants';
+import { useState } from "react";
+import { Users, Trophy, Loader2, AlertCircle } from "lucide-react";
+import { GAME_MODE } from "@/config/constants";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface GameModeSelectionProps {
   onSelectMode: (mode: number, stakeAmount?: number) => void;
@@ -10,9 +11,14 @@ interface GameModeSelectionProps {
   currentPlayer: string;
 }
 
-export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: GameModeSelectionProps) {
+export function GameModeSelection({
+  onSelectMode,
+  isLoading,
+  currentPlayer,
+}: GameModeSelectionProps) {
+  const { t } = useLanguage();
   const [selectedMode, setSelectedMode] = useState<number | null>(null);
-  const [stakeAmount, setStakeAmount] = useState('2');
+  const [stakeAmount, setStakeAmount] = useState("2");
   const [showStakeInput, setShowStakeInput] = useState(false);
 
   const handleModeSelect = (mode: number) => {
@@ -41,17 +47,17 @@ export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: Ga
             <Trophy className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-black mb-2">
-            Set Your Stake
+            {t("stakeAmount")}
           </h2>
-          <p className="text-gray-600">
-            Winner takes 90% of the pool. 10% platform fee.
+          <p className="text-black">
+            {t("winnerTakes")} 90%. {t("platformFee")} 10%.
           </p>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Stake Amount (SUI)
+            <label className="block text-sm font-medium text-black mb-2">
+              {t("stakeAmount")} (SUI)
             </label>
             <input
               type="number"
@@ -59,20 +65,18 @@ export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: Ga
               step="0.1"
               value={stakeAmount}
               onChange={(e) => setStakeAmount(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors"
-              placeholder="Enter stake amount"
+              className="w-full px-4 py-3 border-2 border-black rounded-lg focus:border-black focus:outline-none transition-colors text-black"
+              placeholder={t("enterStakeAmount")}
             />
-            <p className="mt-2 text-sm text-gray-600">
-              Minimum stake: 0.1 SUI
-            </p>
+            <p className="mt-2 text-sm text-gray-600">{t("minimumStake")}</p>
           </div>
 
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800">
-                <p className="font-semibold mb-1">Important!</p>
-                <p>Your SUI will be staked immediately. Access your game anytime from "My Games" even after page reload.</p>
+                <p className="font-semibold mb-1">{t("important")}</p>
+                <p>{t("suiStakedImmediately")}</p>
               </div>
             </div>
           </div>
@@ -81,15 +85,15 @@ export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: Ga
             <button
               onClick={handleConfirmCompetitive}
               disabled={isLoading || parseFloat(stakeAmount) < 0.1}
-              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-900 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed modern-button active:scale-95"
+              className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed modern-button active:scale-95"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Creating Game...
+                  {t("creatingGame")}
                 </span>
               ) : (
-                'Create Competitive Game'
+                t("createCompetitiveGame")
               )}
             </button>
             <button
@@ -97,9 +101,9 @@ export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: Ga
                 setShowStakeInput(false);
                 setSelectedMode(null);
               }}
-              className="w-full py-3 border-2 border-gray-300 rounded-lg hover:border-black transition-colors"
+              className="w-full py-3 border-2 border-black rounded-lg hover:border-black transition-colors"
             >
-              Back
+              {t("back")}
             </button>
           </div>
         </div>
@@ -111,9 +115,9 @@ export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: Ga
     <div className="bg-white border-2 border-black rounded-lg p-8 max-w-md w-full animate-fade-in">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-black mb-2">
-          Choose Game Mode
+          {t("chooseGameMode")}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-black">
           Playing as {truncateAddress(currentPlayer)}
         </p>
       </div>
@@ -122,16 +126,19 @@ export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: Ga
         <button
           onClick={() => handleModeSelect(GAME_MODE.FRIENDLY)}
           disabled={isLoading}
-          className="w-full p-6 border-2 border-gray-300 rounded-lg hover:border-black transition-all duration-200 text-left group hover:scale-[1.02] hover:shadow-lg active:scale-100"
+          className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 text-left group hover:scale-[1.02] hover:shadow-lg active:scale-100"
         >
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center group-hover:from-blue-500 group-hover:to-blue-600 transition-all duration-200 shadow-sm group-hover:shadow-md">
               <Users className="w-6 h-6 text-blue-700 group-hover:text-white transition-colors" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-black mb-1">Friendly Game</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                {t("friendlyGame")}
+              </h3>
               <p className="text-sm text-gray-600">
-                Play for fun with no stakes. Perfect for practice or casual games.
+                Play for fun with no stakes. Perfect for practice or casual
+                games.
               </p>
             </div>
           </div>
@@ -140,16 +147,19 @@ export function GameModeSelection({ onSelectMode, isLoading, currentPlayer }: Ga
         <button
           onClick={() => handleModeSelect(GAME_MODE.COMPETITIVE)}
           disabled={isLoading}
-          className="w-full p-6 border-2 border-gray-300 rounded-lg hover:border-black transition-all duration-200 text-left group hover:scale-[1.02] hover:shadow-lg active:scale-100"
+          className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 text-left group hover:scale-[1.02] hover:shadow-lg active:scale-100"
         >
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg flex items-center justify-center group-hover:from-yellow-500 group-hover:to-yellow-600 transition-all duration-200 shadow-sm group-hover:shadow-md">
               <Trophy className="w-6 h-6 text-yellow-700 group-hover:text-white transition-colors" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-black mb-1">Competitive Game</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                {t("competitiveGame")}
+              </h3>
               <p className="text-sm text-gray-600">
-                Put SUI at stake. Winner takes 90% of the prize pool.
+                Put SUI at stake. {t("winnerTakes")} 90% of the {t("prizePool")}
+                .
               </p>
             </div>
           </div>

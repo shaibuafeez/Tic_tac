@@ -1,11 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { GameState } from './TicTacToeGame';
-import { getUserGames } from '@/utils/game-queries';
-import { useSuiClient } from '@mysten/dapp-kit';
-import { Trophy, Users, Clock, CheckCircle, XCircle, Loader2, Play, AlertCircle } from 'lucide-react';
-import { GAME_STATUS, GAME_MODE } from '@/config/constants';
+import { useState, useEffect } from "react";
+import { GameState } from "./TicTacToeGame";
+import { getUserGames } from "@/utils/game-queries";
+import { useSuiClient } from "@mysten/dapp-kit";
+import {
+  Trophy,
+  Users,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  Play,
+  AlertCircle,
+} from "lucide-react";
+import { GAME_STATUS, GAME_MODE } from "@/config/constants";
 
 interface MyGamesProps {
   currentPlayer: string;
@@ -16,7 +25,7 @@ interface MyGamesProps {
 export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
   const [games, setGames] = useState<GameState[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const suiClient = useSuiClient();
 
   useEffect(() => {
@@ -29,16 +38,20 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
       const userGames = await getUserGames(suiClient, currentPlayer);
       setGames(userGames);
     } catch (error) {
-      console.error('Error loading games:', error);
+      console.error("Error loading games:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredGames = games.filter(game => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return game.status === GAME_STATUS.WAITING || game.status === GAME_STATUS.ACTIVE;
-    if (filter === 'completed') return game.status === GAME_STATUS.COMPLETED;
+  const filteredGames = games.filter((game) => {
+    if (filter === "all") return true;
+    if (filter === "active")
+      return (
+        game.status === GAME_STATUS.WAITING ||
+        game.status === GAME_STATUS.ACTIVE
+      );
+    if (filter === "completed") return game.status === GAME_STATUS.COMPLETED;
     return true;
   });
 
@@ -60,19 +73,20 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
   const getGameStatusText = (game: GameState) => {
     switch (game.status) {
       case GAME_STATUS.WAITING:
-        return 'Waiting for opponent';
+        return "Waiting for opponent";
       case GAME_STATUS.ACTIVE:
-        const isMyTurn = (game.turn % 2 === 0 && game.x === currentPlayer) || 
-                        (game.turn % 2 === 1 && game.o === currentPlayer);
-        return isMyTurn ? 'Your turn' : "Opponent's turn";
+        const isMyTurn =
+          (game.turn % 2 === 0 && game.x === currentPlayer) ||
+          (game.turn % 2 === 1 && game.o === currentPlayer);
+        return isMyTurn ? "Your turn" : "Opponent's turn";
       case GAME_STATUS.COMPLETED:
-        if (game.winner === currentPlayer) return 'You won!';
-        if (game.winner && game.winner !== currentPlayer) return 'You lost';
-        return 'Draw';
+        if (game.winner === currentPlayer) return "You won!";
+        if (game.winner && game.winner !== currentPlayer) return "You lost";
+        return "Draw";
       case GAME_STATUS.CANCELLED:
-        return 'Cancelled';
+        return "Cancelled";
       default:
-        return 'Unknown';
+        return "Unknown";
     }
   };
 
@@ -99,113 +113,148 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
     <div className="bg-white border-2 border-black rounded-lg p-8 max-w-2xl w-full animate-fade-in">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-black mb-2">My Games</h2>
-        <p className="text-gray-600">Continue playing or view your game history</p>
+        <p className="text-black">Continue playing or view your game history</p>
       </div>
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6">
         <button
-          onClick={() => setFilter('all')}
+          onClick={() => setFilter("all")}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
-            filter === 'all'
-              ? 'bg-black text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            filter === "all"
+              ? "bg-black text-white"
+              : "bg-white text-black hover:bg-black hover:text-white"
           }`}
         >
           All ({games.length})
         </button>
         <button
-          onClick={() => setFilter('active')}
+          onClick={() => setFilter("active")}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
-            filter === 'active'
-              ? 'bg-black text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            filter === "active"
+              ? "bg-black text-white"
+              : "bg-white text-black hover:bg-black hover:text-white"
           }`}
         >
-          Active ({games.filter(g => g.status === GAME_STATUS.WAITING || g.status === GAME_STATUS.ACTIVE).length})
+          Active (
+          {
+            games.filter(
+              (g) =>
+                g.status === GAME_STATUS.WAITING ||
+                g.status === GAME_STATUS.ACTIVE
+            ).length
+          }
+          )
         </button>
         <button
-          onClick={() => setFilter('completed')}
+          onClick={() => setFilter("completed")}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
-            filter === 'completed'
-              ? 'bg-black text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            filter === "completed"
+              ? "bg-black text-white"
+              : "bg-white text-black hover:bg-black hover:text-white"
           }`}
         >
-          Completed ({games.filter(g => g.status === GAME_STATUS.COMPLETED).length})
+          Completed (
+          {games.filter((g) => g.status === GAME_STATUS.COMPLETED).length})
         </button>
       </div>
 
       {/* Games List */}
       <div className="space-y-3 mb-6 max-h-[400px] overflow-y-auto">
         {filteredGames.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-black">
             No games found. Start a new game to see it here!
           </div>
         ) : (
           filteredGames.map((game) => {
-            const isWaitingWithStake = game.status === GAME_STATUS.WAITING && 
-                                       game.mode === GAME_MODE.COMPETITIVE && 
-                                       game.stakeAmount > 0 &&
-                                       game.creator === currentPlayer;
-            
+            const isWaitingWithStake =
+              game.status === GAME_STATUS.WAITING &&
+              game.mode === GAME_MODE.COMPETITIVE &&
+              game.stakeAmount > 0 &&
+              game.creator === currentPlayer;
+
             return (
               <button
                 key={game.id}
                 onClick={() => onSelectGame(game)}
                 className={`w-full p-4 border-2 rounded-lg transition-all duration-200 text-left group hover:shadow-md ${
-                  isWaitingWithStake 
-                    ? 'border-yellow-400 bg-yellow-50 hover:border-yellow-600' 
-                    : 'border-gray-200 hover:border-black'
+                  isWaitingWithStake
+                    ? "border-yellow-400 bg-yellow-50 hover:border-yellow-600"
+                    : "border-black hover:border-black"
                 }`}
               >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    {game.mode === GAME_MODE.COMPETITIVE ? (
-                      <Trophy className="w-5 h-5 text-yellow-600" />
-                    ) : (
-                      <Users className="w-5 h-5 text-blue-600" />
-                    )}
-                    <span className="font-semibold">
-                      {game.mode === GAME_MODE.COMPETITIVE ? 'Competitive' : 'Friendly'} Game
-                    </span>
-                    {getGameStatusIcon(game.status)}
-                  </div>
-                  
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <div className="flex items-center gap-4">
-                      <span>vs {game.x === currentPlayer ? truncateAddress(game.o || 'Waiting...') : truncateAddress(game.x)}</span>
-                      {game.mode === GAME_MODE.COMPETITIVE && game.stakeAmount > 0 && (
-                        <span className="font-medium">Stake: {formatSUI(game.stakeAmount)} SUI</span>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      {game.mode === GAME_MODE.COMPETITIVE ? (
+                        <Trophy className="w-5 h-5 text-yellow-600" />
+                      ) : (
+                        <Users className="w-5 h-5 text-blue-600" />
+                      )}
+                      <span className="font-semibold">
+                        {game.mode === GAME_MODE.COMPETITIVE
+                          ? "Competitive"
+                          : "Friendly"}{" "}
+                        Game
+                      </span>
+                      {getGameStatusIcon(game.status)}
+                    </div>
+
+                    <div className="text-sm text-black space-y-1">
+                      <div className="flex items-center gap-4">
+                        <span>
+                          vs{" "}
+                          {game.x === currentPlayer
+                            ? truncateAddress(game.o || "Waiting...")
+                            : truncateAddress(game.x)}
+                        </span>
+                        {game.mode === GAME_MODE.COMPETITIVE &&
+                          game.stakeAmount > 0 && (
+                            <span className="font-medium">
+                              Stake: {formatSUI(game.stakeAmount)} SUI
+                            </span>
+                          )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-medium ${
+                            game.status === GAME_STATUS.COMPLETED &&
+                            game.winner === currentPlayer
+                              ? "text-green-600"
+                              : game.status === GAME_STATUS.COMPLETED &&
+                                game.winner &&
+                                game.winner !== currentPlayer
+                              ? "text-red-600"
+                              : game.status === GAME_STATUS.ACTIVE
+                              ? "text-blue-600"
+                              : "text-black"
+                          }`}
+                        >
+                          {getGameStatusText(game)}
+                        </span>
+                      </div>
+                      {isWaitingWithStake && (
+                        <div className="flex items-center gap-2 text-yellow-700 mt-2">
+                          <AlertCircle className="w-4 h-4" />
+                          <span className="text-xs font-medium">
+                            Your {formatSUI(game.stakeAmount)} SUI is staked -
+                            share link to get opponent!
+                          </span>
+                        </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`font-medium ${
-                        game.status === GAME_STATUS.COMPLETED && game.winner === currentPlayer ? 'text-green-600' :
-                        game.status === GAME_STATUS.COMPLETED && game.winner && game.winner !== currentPlayer ? 'text-red-600' :
-                        game.status === GAME_STATUS.ACTIVE ? 'text-blue-600' :
-                        'text-gray-600'
-                      }`}>
-                        {getGameStatusText(game)}
-                      </span>
-                    </div>
-                    {isWaitingWithStake && (
-                      <div className="flex items-center gap-2 text-yellow-700 mt-2">
-                        <AlertCircle className="w-4 h-4" />
-                        <span className="text-xs font-medium">Your {formatSUI(game.stakeAmount)} SUI is staked - share link to get opponent!</span>
-                      </div>
-                    )}
+                  </div>
+
+                  <div className="ml-4">
+                    <span className="text-sm text-black group-hover:text-white transition-colors">
+                      {game.status === GAME_STATUS.COMPLETED
+                        ? "View"
+                        : "Continue"}{" "}
+                      →
+                    </span>
                   </div>
                 </div>
-                
-                <div className="ml-4">
-                  <span className="text-sm text-gray-500 group-hover:text-black transition-colors">
-                    {game.status === GAME_STATUS.COMPLETED ? 'View' : 'Continue'} →
-                  </span>
-                </div>
-              </div>
-            </button>
+              </button>
             );
           })
         )}
@@ -213,7 +262,7 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
 
       <button
         onClick={onBack}
-        className="w-full py-3 border-2 border-gray-300 rounded-lg hover:border-black transition-all duration-200"
+        className="w-full py-3 border-2 border-black rounded-lg hover:border-black hover:bg-black hover:text-white transition-all duration-200"
       >
         Back to Main Menu
       </button>

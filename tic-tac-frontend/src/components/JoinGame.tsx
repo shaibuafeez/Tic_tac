@@ -1,7 +1,17 @@
 "use client";
 
-import { Trophy, Loader2, AlertCircle, Users, Twitter, XCircle } from "lucide-react";
+import {
+  Trophy,
+  Loader2,
+  AlertCircle,
+  Users,
+  Twitter,
+  XCircle,
+} from "lucide-react";
 import { GAME_MODE } from "@/config/constants";
+import { BalanceCheck } from "./BalanceCheck";
+import { useBalance } from "@/hooks/useBalance";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface JoinGameProps {
   gameId: string;
@@ -26,6 +36,7 @@ export function JoinGame({
   isLoading,
   currentPlayer,
 }: JoinGameProps) {
+  const { t } = useLanguage();
   const formatSUI = (mist: number) => {
     return (mist / 1_000_000_000).toFixed(2);
   };
@@ -36,6 +47,10 @@ export function JoinGame({
 
   const isCreator = creator === currentPlayer;
   const isCompetitive = mode === GAME_MODE.COMPETITIVE;
+  const { checkSufficientBalance } = useBalance();
+  const hasSufficientBalance = isCompetitive
+    ? checkSufficientBalance(stakeAmount)
+    : true;
 
   const shareToTwitter = () => {
     const suiAmount = stakeAmount / 1_000_000_000;
@@ -71,7 +86,7 @@ export function JoinGame({
   };
 
   return (
-    <div className="bg-white border-2 border-black rounded-lg p-8 max-w-md w-full animate-fade-in">
+    <div className="bg-white border-2 border-gray-200 rounded-lg p-8 max-w-md w-full animate-fade-in shadow-lg">
       <div className="text-center mb-6">
         <div
           className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
@@ -86,37 +101,41 @@ export function JoinGame({
             <Users className="w-8 h-8 text-white" />
           )}
         </div>
-        <h2 className="text-2xl font-bold text-black mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
           {isCreator
-            ? `Your ${isCompetitive ? "Competitive" : "Friendly"} Game`
-            : `Join ${isCompetitive ? "Competitive" : "Friendly"} Game`}
+            ? `${t("yourGame")} (${
+                isCompetitive ? t("competitiveGame") : t("friendlyGame")
+              })`
+            : `${t("joinGame")} (${
+                isCompetitive ? t("competitiveGame") : t("friendlyGame")
+              })`}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-black">
           {isCreator
-            ? "Waiting for an opponent to join your game"
+            ? t("waitingForOpponentToJoin")
             : isCompetitive
-            ? "You've been invited! Match the stake to join this game"
-            : "You've been invited to this friendly game!"}
+            ? t("invitedCompetitive")
+            : t("invitedFriendly")}
         </p>
       </div>
 
       <div className="space-y-4 mb-6">
-        <div className="p-4 bg-gray-50 rounded-lg">
+        <div className="p-4 bg-white border border-black rounded-lg">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Game ID</span>
+            <span className="text-sm text-black">{t("gameId")}</span>
             <span className="text-sm font-mono text-black">
               {truncateAddress(gameId)}
             </span>
           </div>
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Creator</span>
+            <span className="text-sm text-black">{t("creator")}</span>
             <span className="text-sm font-mono text-black">
-              {isCreator ? "You" : truncateAddress(creator)}
+              {isCreator ? t("you") : truncateAddress(creator)}
             </span>
           </div>
           {isCompetitive && (
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Stake Required</span>
+              <span className="text-sm text-black">{t("stakeRequired")}</span>
               <span className="text-lg font-bold text-black">
                 {formatSUI(stakeAmount)} SUI
               </span>
@@ -128,11 +147,14 @@ export function JoinGame({
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-yellow-800">
-                <p className="font-semibold mb-1">Prize Distribution</p>
-                <p>Winner: {formatSUI(stakeAmount * 2 * 0.9)} SUI (90%)</p>
+              <div className="text-sm text-yellow-900">
+                <p className="font-semibold mb-1">{t("prizeDistribution")}</p>
                 <p>
-                  Platform fee: {formatSUI(stakeAmount * 2 * 0.1)} SUI (10%)
+                  {t("winner")}: {formatSUI(stakeAmount * 2 * 0.9)} SUI (90%)
+                </p>
+                <p>
+                  {t("platformFee")}: {formatSUI(stakeAmount * 2 * 0.1)} SUI
+                  (10%)
                 </p>
               </div>
             </div>
@@ -141,19 +163,26 @@ export function JoinGame({
       </div>
 
       <div className="space-y-2">
+        {!isCreator && isCompetitive && !hasSufficientBalance && (
+          <BalanceCheck
+            requiredAmount={stakeAmount}
+            actionText="join this competitive game"
+          />
+        )}
+
         {!isCreator && (
           <button
             onClick={onJoin}
-            disabled={isLoading}
-            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-900 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed modern-button active:scale-95"
+            disabled={isLoading || (isCompetitive && !hasSufficientBalance)}
+            className="w-full bg-black text-white py-3 rounded-lg hover:bg-black transition-all duration-200 disabled:bg-white disabled:text-black disabled:cursor-not-allowed modern-button active:scale-95"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spinner" />
-                Joining Game...
+                {t("joiningGame")}
               </span>
             ) : (
-              `Join Game${
+              `${t("joinGame")}${
                 isCompetitive ? ` (${formatSUI(stakeAmount)} SUI)` : ""
               }`
             )}
@@ -176,18 +205,16 @@ export function JoinGame({
                   className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
                   style={{ animationDelay: "300ms" }}
                 ></div>
-                <span>Waiting for an opponent to join</span>
+                <span>{t("waitingForOpponentToJoin")}</span>
               </div>
-              <p className="text-xs text-blue-600 mt-1">
-                Share the game link with your opponent
-              </p>
+              <p className="text-xs text-blue-600 mt-1">{t("shareGameLink")}</p>
             </div>
             <button
               onClick={shareToTwitter}
               className="w-full bg-[#1DA1F2] text-white py-3 rounded-lg hover:bg-[#1a8cd8] transition-all duration-200 flex items-center justify-center gap-2 modern-button"
             >
               <Twitter className="w-5 h-5" />
-              Share on Twitter
+              {t("shareOnTwitter")}
             </button>
           </div>
         )}
@@ -199,15 +226,15 @@ export function JoinGame({
             className="w-full py-3 bg-red-50 text-red-700 border-2 border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <XCircle className="w-5 h-5" />
-            Cancel Game & Get {formatSUI(stakeAmount)} SUI Back
+            {t("cancelGame")} & {t("getSuiBack")} {formatSUI(stakeAmount)} SUI
           </button>
         )}
-        
+
         <button
           onClick={onCancel}
-          className="w-full py-3 border-2 border-gray-300 rounded-lg hover:border-black transition-all duration-200 hover:shadow-md active:scale-95"
+          className="w-full py-3 border-2 border-black rounded-lg hover:border-black hover:bg-black hover:text-white transition-all duration-200 hover:shadow-md active:scale-95"
         >
-          Back to Menu
+          {t("backToMenu")}
         </button>
       </div>
     </div>

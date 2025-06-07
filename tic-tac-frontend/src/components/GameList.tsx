@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSuiClient } from '@mysten/dapp-kit';
-import { Grid3x3, Loader2, RefreshCw, Trophy, Users } from 'lucide-react';
-import { CONTRACT_CONFIG, GAME_STATUS, GAME_MODE } from '@/config/constants';
-import { getAllActiveGames } from '@/utils/game-queries';
-import { GameState } from './TicTacToeGame';
+import { useState, useEffect } from "react";
+import { useSuiClient } from "@mysten/dapp-kit";
+import { Grid3x3, Loader2, RefreshCw, Trophy, Users } from "lucide-react";
+import { GAME_STATUS, GAME_MODE } from "@/config/constants";
+import { getAllActiveGames } from "@/utils/game-queries";
+import { GameState } from "./TicTacToeGame";
 
 interface GameListProps {
   onSelectGame: (game: GameState) => void;
@@ -22,12 +22,12 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
     try {
       const activeGames = await getAllActiveGames(suiClient);
       // Filter out games where current player is already a participant
-      const availableGames = activeGames.filter(game => 
-        game.x !== currentPlayer && game.o !== currentPlayer
+      const availableGames = activeGames.filter(
+        (game) => game.x !== currentPlayer && game.o !== currentPlayer
       );
       setGames(availableGames);
     } catch (error) {
-      console.error('Error fetching games:', error);
+      console.error("Error fetching games:", error);
     } finally {
       setIsLoading(false);
     }
@@ -38,16 +38,16 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
   }, [currentPlayer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const truncateAddress = (address: string) => {
-    if (address.includes('...')) return address; // Already truncated
+    if (address.includes("...")) return address; // Already truncated
     if (address.length <= 10) return address;
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
   const getGameStatus = (game: GameState) => {
     if (game.status === GAME_STATUS.WAITING) {
-      return 'Waiting for player';
+      return "Waiting for player";
     }
-    return game.status === GAME_STATUS.ACTIVE ? 'In progress' : 'Completed';
+    return game.status === GAME_STATUS.ACTIVE ? "In progress" : "Completed";
   };
 
   if (isLoading) {
@@ -70,15 +70,13 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
         <h2 className="text-2xl font-bold text-black mb-2">
           Browse Active Games
         </h2>
-        <p className="text-gray-600">
-          Join a game waiting for an opponent
-        </p>
+        <p className="text-black">Join a game waiting for an opponent</p>
       </div>
 
       <div className="mb-4 flex justify-end">
         <button
           onClick={fetchGames}
-          className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-colors border border-gray-300"
+          className="p-2 text-black hover:text-white hover:bg-black rounded-lg transition-colors border border-black"
           title="Refresh"
         >
           <RefreshCw className="w-4 h-4" />
@@ -86,7 +84,7 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
       </div>
 
       {games.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-black">
           <p>No games waiting for players</p>
           <p className="text-sm mt-2">Create a new game or check back later</p>
         </div>
@@ -96,7 +94,7 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
             <button
               key={game.id}
               onClick={() => onSelectGame(game)}
-              className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-black transition-all duration-200 text-left hover:shadow-md"
+              className="w-full p-4 border-2 border-black rounded-lg hover:border-black hover:bg-black hover:text-white transition-all duration-200 text-left hover:shadow-md"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -106,23 +104,26 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
                     <Users className="w-5 h-5 text-blue-600" />
                   )}
                   <span className="font-semibold">
-                    {game.mode === GAME_MODE.COMPETITIVE ? 'Competitive' : 'Friendly'}
+                    {game.mode === GAME_MODE.COMPETITIVE
+                      ? "Competitive"
+                      : "Friendly"}
                   </span>
-                  {game.mode === GAME_MODE.COMPETITIVE && game.stakeAmount > 0 && (
-                    <span className="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-medium">
-                      {(game.stakeAmount / 1_000_000_000).toFixed(2)} SUI
-                    </span>
-                  )}
+                  {game.mode === GAME_MODE.COMPETITIVE &&
+                    game.stakeAmount > 0 && (
+                      <span className="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-medium">
+                        {(game.stakeAmount / 1_000_000_000).toFixed(2)} SUI
+                      </span>
+                    )}
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-black">
                   {getGameStatus(game)}
                 </span>
               </div>
-              
+
               <div className="text-sm space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-600">Created by:</span>
-                  <span className="font-mono text-gray-700">
+                  <span className="text-black">Created by:</span>
+                  <span className="font-mono text-black">
                     {truncateAddress(game.creator)}
                   </span>
                 </div>
@@ -136,7 +137,6 @@ export function GameList({ onSelectGame, currentPlayer }: GameListProps) {
           ))}
         </div>
       )}
-
     </div>
   );
 }

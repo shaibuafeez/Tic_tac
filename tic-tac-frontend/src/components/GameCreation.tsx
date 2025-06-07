@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Users, Play } from 'lucide-react';
+import { useState } from "react";
+import { Users, Play } from "lucide-react";
 
 interface GameCreationProps {
   onCreateGame: (playerO: string) => void;
@@ -9,8 +9,12 @@ interface GameCreationProps {
   currentPlayer: string;
 }
 
-export function GameCreation({ onCreateGame, isLoading, currentPlayer }: GameCreationProps) {
-  const [playerOAddress, setPlayerOAddress] = useState('');
+export function GameCreation({
+  onCreateGame,
+  isLoading,
+  currentPlayer,
+}: GameCreationProps) {
+  const [playerOAddress, setPlayerOAddress] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,16 +34,14 @@ export function GameCreation({ onCreateGame, isLoading, currentPlayer }: GameCre
         <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
           <Users className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-black mb-2">
-          Create New Game
-        </h2>
-        <p className="text-gray-600">
+        <h2 className="text-2xl font-bold text-black mb-2">Create New Game</h2>
+        <p className="text-black">
           Enter the address of your opponent to start a new game
         </p>
       </div>
 
-      <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <div className="text-sm text-gray-600 mb-1">Player X (You):</div>
+      <div className="mb-6 p-4 bg-white border border-black rounded-lg">
+        <div className="text-sm text-black mb-1">Player X (You):</div>
         <div className="font-mono text-sm text-black">
           {truncateAddress(currentPlayer)}
         </div>
@@ -47,7 +49,10 @@ export function GameCreation({ onCreateGame, isLoading, currentPlayer }: GameCre
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="playerO" className="block text-sm font-medium text-black mb-2">
+          <label
+            htmlFor="playerO"
+            className="block text-sm font-medium text-black mb-2"
+          >
             Player O Address:
           </label>
           <input
@@ -56,7 +61,7 @@ export function GameCreation({ onCreateGame, isLoading, currentPlayer }: GameCre
             value={playerOAddress}
             onChange={(e) => setPlayerOAddress(e.target.value)}
             placeholder="0x..."
-            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-black focus:outline-none font-mono text-sm"
+            className="w-full px-3 py-2 border-2 border-black rounded-lg focus:border-black focus:outline-none font-mono text-sm"
             disabled={isLoading}
           />
           {playerOAddress === currentPlayer && (
@@ -68,8 +73,12 @@ export function GameCreation({ onCreateGame, isLoading, currentPlayer }: GameCre
 
         <button
           type="submit"
-          disabled={isLoading || !playerOAddress.trim() || playerOAddress === currentPlayer}
-          className="w-full bg-black hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+          disabled={
+            isLoading ||
+            !playerOAddress.trim() ||
+            playerOAddress === currentPlayer
+          }
+          className="w-full bg-black hover:bg-black disabled:bg-white disabled:text-black disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <>
@@ -85,10 +94,11 @@ export function GameCreation({ onCreateGame, isLoading, currentPlayer }: GameCre
         </button>
       </form>
 
-      <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <div className="text-sm text-gray-700">
-          <strong>Note:</strong> Make sure the opponent&apos;s address is correct. 
-          Once the game is created, both players can take turns making moves.
+      <div className="mt-6 p-4 bg-white border border-black rounded-lg">
+        <div className="text-sm text-black">
+          <strong>Note:</strong> Make sure the opponent&apos;s address is
+          correct. Once the game is created, both players can take turns making
+          moves.
         </div>
       </div>
     </div>

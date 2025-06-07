@@ -16,8 +16,14 @@ export async function getUserGames(
     });
 
     const userCreatedGameIds = createdGames.data
-      .filter((event: any) => event.parsedJson?.creator === userAddress)
-      .map((event: any) => event.parsedJson?.game_id)
+      .filter((event) => {
+        const parsed = event.parsedJson as { creator?: string; game_id?: string } | undefined;
+        return parsed?.creator === userAddress;
+      })
+      .map((event) => {
+        const parsed = event.parsedJson as { creator?: string; game_id?: string } | undefined;
+        return parsed?.game_id;
+      })
       .filter(Boolean);
 
     // Also query for games where user joined
@@ -29,8 +35,14 @@ export async function getUserGames(
     });
 
     const userJoinedGameIds = joinedGames.data
-      .filter((event: any) => event.parsedJson?.player === userAddress)
-      .map((event: any) => event.parsedJson?.game_id)
+      .filter((event) => {
+        const parsed = event.parsedJson as { player?: string; game_id?: string } | undefined;
+        return parsed?.player === userAddress;
+      })
+      .map((event) => {
+        const parsed = event.parsedJson as { player?: string; game_id?: string } | undefined;
+        return parsed?.game_id;
+      })
       .filter(Boolean);
 
     // Combine all game IDs and remove duplicates
@@ -39,7 +51,7 @@ export async function getUserGames(
     // Fetch details of all games
     const gamePromises = allGameIds.map(id => 
       suiClient.getObject({
-        id,
+        id: id as string,
         options: { showContent: true }
       })
     );
@@ -53,7 +65,17 @@ export async function getUserGames(
     for (const obj of allGameObjects) {
       if (!obj || !obj.content || !('fields' in obj.content)) continue;
       
-      const fields = obj.content.fields as any;
+      const fields = obj.content.fields as {
+        board?: number[];
+        turn?: number;
+        x?: string;
+        o?: string;
+        mode?: number;
+        status?: number;
+        stake_amount?: number;
+        creator?: string;
+        winner?: string;
+      };
       const gameId = obj.objectId;
       
       // Include games where user is creator (x) or joined player (o)
@@ -108,13 +130,16 @@ export async function getAllActiveGames(suiClient: SuiClient): Promise<GameState
     });
 
     const gameIds = data
-      .map((event: any) => event.parsedJson?.game_id)
+      .map((event) => {
+        const parsed = event.parsedJson as { game_id?: string } | undefined;
+        return parsed?.game_id;
+      })
       .filter(Boolean);
 
     // Fetch game details
     const gamePromises = gameIds.map(id => 
       suiClient.getObject({
-        id,
+        id: id as string,
         options: { showContent: true }
       })
     );
@@ -126,7 +151,17 @@ export async function getAllActiveGames(suiClient: SuiClient): Promise<GameState
       const obj = result.data;
       if (!obj || !obj.content || !('fields' in obj.content)) continue;
       
-      const fields = obj.content.fields as any;
+      const fields = obj.content.fields as {
+        board?: number[];
+        turn?: number;
+        x?: string;
+        o?: string;
+        mode?: number;
+        status?: number;
+        stake_amount?: number;
+        creator?: string;
+        winner?: string;
+      };
       const gameId = obj.objectId;
       
       // Only include waiting or active games
