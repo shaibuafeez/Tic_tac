@@ -841,17 +841,31 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         { transaction },
         {
           onSuccess: (result) => {
-            console.log("Rematch accepted:", result);
+            console.log("🎮 REMATCH ACCEPTED - Full result:", result);
             
             // Extract new game ID from RematchCreated event
             const resultWithChanges = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
+            
+            console.log("🔍 Checking for events...");
             if (resultWithChanges.events) {
-              console.log("Events from rematch acceptance:", resultWithChanges.events);
+              console.log("📋 All events from rematch acceptance:", resultWithChanges.events);
               
+              // Log each event with detailed info
+              resultWithChanges.events.forEach((event, index) => {
+                console.log(`📝 Event ${index}:`, {
+                  type: event.type,
+                  parsedJson: event.parsedJson,
+                  fullEvent: event
+                });
+              });
+              
+              console.log("🔎 Looking for RematchCreated event...");
               const rematchEvent = resultWithChanges.events.find(
                 (event: { type?: string; parsedJson?: unknown }) => 
                   event.type && event.type.includes("RematchCreated")
               );
+              
+              console.log("🎯 Found RematchCreated event:", rematchEvent);
               
               if (rematchEvent && rematchEvent.parsedJson) {
                 const eventData = rematchEvent.parsedJson as { 
@@ -859,57 +873,83 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
                   old_game_id?: string;
                 };
                 
-                console.log("RematchCreated event data:", eventData);
+                console.log("📊 RematchCreated event data:", eventData);
+                console.log("🆔 new_game_id value:", eventData.new_game_id);
+                console.log("🆔 old_game_id value:", eventData.old_game_id);
                 
                 if (eventData.new_game_id) {
+                  console.log("✅ Found new_game_id, attempting navigation...");
                   alert("Rematch accepted! Starting new game...");
-                  console.log("Navigating to new game:", eventData.new_game_id);
-                  // Navigate to the new game
-                  router.push(`/game/${eventData.new_game_id}`);
+                  console.log("🚀 Navigating to new game:", eventData.new_game_id);
+                  
+                  // Add a small delay to ensure the alert is shown
+                  setTimeout(() => {
+                    router.push(`/game/${eventData.new_game_id}`);
+                  }, 100);
                   return;
+                } else {
+                  console.log("❌ new_game_id is missing or empty");
                 }
+              } else {
+                console.log("❌ No RematchCreated event found or parsedJson is missing");
               }
               
-              // Fallback: Check for GameCreated event
+              console.log("🔍 Trying fallback: Looking for GameCreated event...");
               const gameCreatedEvent = resultWithChanges.events.find(
                 (event: { type?: string; parsedJson?: unknown }) => 
                   event.type && event.type.includes("GameCreated")
               );
               
+              console.log("🎯 Found GameCreated event:", gameCreatedEvent);
+              
               if (gameCreatedEvent && gameCreatedEvent.parsedJson) {
                 const eventData = gameCreatedEvent.parsedJson as { game_id?: string };
+                console.log("📊 GameCreated event data:", eventData);
                 if (eventData.game_id) {
+                  console.log("✅ Found game_id from GameCreated, navigating...");
                   alert("Rematch accepted! Starting new game...");
-                  console.log("Navigating to new game from GameCreated event:", eventData.game_id);
+                  console.log("🚀 Navigating to new game from GameCreated event:", eventData.game_id);
                   router.push(`/game/${eventData.game_id}`);
                   return;
                 }
               }
+            } else {
+              console.log("❌ No events found in transaction result");
             }
             
             // Fallback: Check objectChanges for new Game object
+            console.log("🔍 Trying fallback: Checking objectChanges...");
             const resultWithObjectChanges = result as any; // eslint-disable-line @typescript-eslint/no-explicit-any
             if (resultWithObjectChanges.objectChanges) {
-              console.log("Checking object changes for new game");
+              console.log("📋 Object changes found:", resultWithObjectChanges.objectChanges);
               
               const createdObjects = resultWithObjectChanges.objectChanges.filter(
                 (change: any) => change.type === "created" // eslint-disable-line @typescript-eslint/no-explicit-any
               );
               
+              console.log("🆕 Created objects:", createdObjects);
+              
               const newGameObject = createdObjects.find((obj: { objectType?: string; objectId?: string }) => {
-                return obj.objectType && obj.objectType.includes("tic_tac::Game");
+                const isGameObject = obj.objectType && obj.objectType.includes("tic_tac::Game");
+                console.log(`🎯 Checking object:`, obj, `Is Game object:`, isGameObject);
+                return isGameObject;
               });
               
+              console.log("🎮 Found new Game object:", newGameObject);
+              
               if (newGameObject && newGameObject.objectId) {
+                console.log("✅ Found new game from objectChanges, navigating...");
                 alert("Rematch accepted! Starting new game...");
-                console.log("Navigating to new game from object changes:", newGameObject.objectId);
+                console.log("🚀 Navigating to new game from object changes:", newGameObject.objectId);
                 router.push(`/game/${newGameObject.objectId}`);
                 return;
               }
+            } else {
+              console.log("❌ No objectChanges found in transaction result");
             }
             
             // Final fallback: reload current game
-            console.log("No new game found, reloading current game");
+            console.log("❌ No new game found through any method, reloading current game");
             alert("Rematch accepted! Game updated.");
             loadGame(gameState.id);
           },
