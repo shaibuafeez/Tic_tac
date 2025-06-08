@@ -92,6 +92,14 @@ export const translations = {
     shareGame: 'Share Game',
     rematch: 'Rematch',
     claimVictory: 'Claim Victory',
+    requestRematch: 'Request Rematch',
+    acceptRematch: 'Accept Rematch',
+    declineRematch: 'Decline',
+    rematchRequested: 'Rematch Requested',
+    rematchDeclined: 'Rematch declined',
+    rematchInProgress: 'Rematch in progress...',
+    noRematchRequested: 'No rematch requested',
+    opponentWantsRematch: 'wants a rematch!',
     
     // Game creation
     enterStakeAmount: 'Enter stake amount',
@@ -243,6 +251,14 @@ export const translations = {
     shareGame: 'Compartir Juego',
     rematch: 'Revancha',
     claimVictory: 'Reclamar Victoria',
+    requestRematch: 'Solicitar Revancha',
+    acceptRematch: 'Aceptar Revancha',
+    declineRematch: 'Rechazar',
+    rematchRequested: 'Revancha Solicitada',
+    rematchDeclined: 'Revancha rechazada',
+    rematchInProgress: 'Revancha en progreso...',
+    noRematchRequested: 'No hay solicitud de revancha',
+    opponentWantsRematch: '¡quiere una revancha!',
     
     // Game creation
     enterStakeAmount: 'Ingrese cantidad de apuesta',

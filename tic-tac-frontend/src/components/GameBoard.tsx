@@ -26,9 +26,6 @@ interface GameBoardProps {
   onHome?: () => void;
   onCancelGame?: () => void;
   onClaimTimeoutVictory?: () => void;
-  onRequestRematch?: () => void;
-  onAcceptRematch?: () => void;
-  onRejectRematch?: () => void;
   isLoading: boolean;
   currentPlayer: string;
 }
@@ -40,9 +37,6 @@ export function GameBoard({
   onHome,
   onCancelGame,
   onClaimTimeoutVictory,
-  onRequestRematch,
-  onAcceptRematch,
-  onRejectRematch,
   isLoading,
   currentPlayer,
 }: GameBoardProps) {
@@ -248,11 +242,11 @@ export function GameBoard({
             isCompetitive && gameState.stakeAmount > 0
               ? `🎮 Good game! Lost ${suiAmount.toFixed(
                   2
-                )} SUI but ready for revenge on @SuiNetwork!\n\n🎯 Rematch: ${gameLink}\n👀 Watch the game: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`
+                )} SUI but ready for another game on @SuiNetwork!\n\n🎯 Play again: ${gameLink}\n👀 Watch the game: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`
               : `🎮 Great match! Ready for another round of Tic-Tac-Toe on @SuiNetwork!\n\n🎯 Play again: ${gameLink}\n👀 Watch: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
         }
       } else {
-        message = `🤝 It's a draw! Intense Tic-Tac-Toe match on @SuiNetwork!\n\n🎮 Rematch: ${gameLink}\n👀 Watch the game: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
+        message = `🤝 It's a draw! Intense Tic-Tac-Toe match on @SuiNetwork!\n\n🎮 Play again: ${gameLink}\n👀 Watch the game: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
       }
     } else {
       message =
@@ -353,12 +347,21 @@ export function GameBoard({
                 : "bg-white border-black"
             } ${turn % 2 === 0 && !gameOver ? "scale-105" : ""}`}
           >
-            <div
-              className={`text-sm ${
-                currentPlayer === x ? "text-white" : "text-black"
-              }`}
-            >
-              {t("playerX")}
+            <div className="flex items-center justify-between">
+              <div
+                className={`text-sm ${
+                  currentPlayer === x ? "text-white" : "text-black"
+                }`}
+              >
+                {t("playerX")}
+              </div>
+              {turn % 2 === 0 && !gameOver && (
+                <div className={`text-xs font-bold ${
+                  currentPlayer === x ? "text-white" : "text-black"
+                } animate-pulse`}>
+                  {t("yourTurnLabel")}
+                </div>
+              )}
             </div>
             <div
               className={`font-mono text-sm ${
@@ -368,7 +371,7 @@ export function GameBoard({
               {truncateAddress(x)}
             </div>
             {currentPlayer === x && (
-              <div className="text-xs text-white mt-1">{t("you")}</div>
+              <div className="text-xs text-white mt-1">{t("you")} ✓</div>
             )}
           </div>
           <div
@@ -378,12 +381,21 @@ export function GameBoard({
                 : "bg-white border-black"
             } ${turn % 2 === 1 && !gameOver ? "scale-105" : ""}`}
           >
-            <div
-              className={`text-sm ${
-                currentPlayer === o ? "text-white" : "text-black"
-              }`}
-            >
-              {t("playerO")}
+            <div className="flex items-center justify-between">
+              <div
+                className={`text-sm ${
+                  currentPlayer === o ? "text-white" : "text-black"
+                }`}
+              >
+                {t("playerO")}
+              </div>
+              {turn % 2 === 1 && !gameOver && (
+                <div className={`text-xs font-bold ${
+                  currentPlayer === o ? "text-white" : "text-black"
+                } animate-pulse`}>
+                  {t("yourTurnLabel")}
+                </div>
+              )}
             </div>
             <div
               className={`font-mono text-sm ${
@@ -393,7 +405,7 @@ export function GameBoard({
               {truncateAddress(o)}
             </div>
             {currentPlayer === o && (
-              <div className="text-xs text-white mt-1">{t("you")}</div>
+              <div className="text-xs text-white mt-1">{t("you")} ✓</div>
             )}
           </div>
         </div>
@@ -520,7 +532,7 @@ export function GameBoard({
             <span className="text-black">
               {isCurrentPlayerTurn() ? (
                 <span className="font-medium animate-pulse">
-                  {t("yourTurn")}
+                  {t("yourTurnLabel")}
                 </span>
               ) : (
                 t("opponentTurn")
@@ -529,68 +541,6 @@ export function GameBoard({
           )}
         </div>
 
-        {/* Rematch Section - Show after game completion */}
-        {gameOver && !gameState.id.startsWith("game-") && (
-          <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-            {gameState.rematchRequestedBy ? (
-              gameState.rematchRequestedBy === currentPlayer ? (
-                <div className="text-center">
-                  <p className="text-blue-800 font-medium mb-2">
-                    🔄 Rematch requested!
-                  </p>
-                  <p className="text-sm text-blue-600">
-                    Waiting for opponent to accept...
-                  </p>
-                </div>
-              ) : (
-                <div className="text-center space-y-3">
-                  <p className="text-blue-800 font-medium">
-                    🔄 {truncateAddress(gameState.rematchRequestedBy)} wants a rematch!
-                  </p>
-                  {gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0 && (
-                    <p className="text-sm text-blue-600">
-                      Stake: {(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI
-                    </p>
-                  )}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={onAcceptRematch}
-                      disabled={isLoading}
-                      className="flex-1 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ✓ Accept
-                    </button>
-                    <button
-                      onClick={onRejectRematch}
-                      disabled={isLoading}
-                      className="flex-1 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ✗ Decline
-                    </button>
-                  </div>
-                </div>
-              )
-            ) : (
-              <div className="text-center">
-                <p className="text-blue-800 font-medium mb-3">
-                  Great game! Want a rematch?
-                </p>
-                {gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0 && (
-                  <p className="text-sm text-blue-600 mb-3">
-                    Same stake: {(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI
-                  </p>
-                )}
-                <button
-                  onClick={onRequestRematch}
-                  disabled={isLoading}
-                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  🔄 Request Rematch
-                </button>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Cancel Button for Waiting Games */}

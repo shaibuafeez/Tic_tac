@@ -39,8 +39,6 @@ export interface GameState {
   lastMoveEpoch?: number;
   gameLink?: string;
   viewerLink?: string;
-  rematchRequestedBy?: string;
-  rematchAccepted?: boolean;
 }
 
 interface TicTacToeGameProps {
@@ -79,13 +77,11 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
   // Use real-time sync when waiting for opponent (for both game types)
   // or when in active game to see opponent moves
-  // or when game is completed to detect rematch requests
   const shouldSync =
     gameState !== null &&
     !gameState.id.startsWith("game-") &&
     (gameState.status === GAME_STATUS.WAITING ||
-      gameState.status === GAME_STATUS.ACTIVE ||
-      gameState.status === GAME_STATUS.COMPLETED);
+      gameState.status === GAME_STATUS.ACTIVE);
 
   useGameSync({
     gameId: shouldSync ? gameState.id : null,
@@ -94,28 +90,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       console.log("📊 Game sync - Current state vs Updated:", {
         currentStatus: gameState?.status,
         updatedStatus: updatedGame.status,
-        currentRematchRequestedBy: gameState?.rematchRequestedBy,
-        updatedRematchRequestedBy: updatedGame.rematchRequestedBy,
-        gameCompleted: updatedGame.status === GAME_STATUS.COMPLETED,
-        hasRematchRequest: !!updatedGame.rematchRequestedBy,
         currentPlayer: account?.address
       });
-      
-      // Check if this is a rematch request update
-      if (updatedGame.rematchRequestedBy && !gameState?.rematchRequestedBy) {
-        console.log("🔔 NEW REMATCH REQUEST detected!", {
-          requestedBy: updatedGame.rematchRequestedBy,
-          currentPlayer: account?.address,
-          isForMe: updatedGame.rematchRequestedBy !== account?.address
-        });
-        
-        // Show notification if it's for the current player
-        if (updatedGame.rematchRequestedBy !== account?.address) {
-          // You could add a notification system here
-          console.log("🎮 Showing rematch request to current player");
-          alert(`🔄 ${updatedGame.rematchRequestedBy.slice(0, 6)}...${updatedGame.rematchRequestedBy.slice(-4)} wants a rematch!`);
-        }
-      }
       
       if (
         updatedGame.status === GAME_STATUS.ACTIVE &&
@@ -130,7 +106,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       }
     },
     enabled: shouldSync,
-    interval: gameState?.status === GAME_STATUS.COMPLETED ? 2000 : 3000, // Poll faster for completed games to catch rematch requests
+    interval: 3000,
   });
 
   // Load game if gameId is provided
@@ -180,12 +156,6 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
       const fields = content.fields as Record<string, unknown>;
       console.log("Game fields from blockchain:", fields);
-      console.log("🔍 Rematch field details:", {
-        raw_field: fields.rematch_requested_by,
-        field_type: typeof fields.rematch_requested_by,
-        is_zero_address: isZeroAddress(fields.rematch_requested_by),
-        is_empty: !fields.rematch_requested_by
-      });
 
       // Parse the board array properly
       let board = Array(9).fill(GAME_CONSTANTS.MARK_EMPTY);
@@ -213,10 +183,6 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         lastMoveEpoch: Number(fields.last_move_ms) || 0,
         gameLink: `${window.location.origin}/game/${id}`,
         viewerLink: `${window.location.origin}/view/${id}`,
-        rematchRequestedBy: !isZeroAddress(fields.rematch_requested_by)
-          ? String(fields.rematch_requested_by) 
-          : undefined,
-        rematchAccepted: fields.rematch_accepted ? Boolean(fields.rematch_accepted) : false,
       };
 
       console.log("Parsed game state:", gameState);
@@ -735,273 +701,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     }
   };
 
-  const requestRematch = async () => {
-    if (!account || !gameState) return;
 
-    setIsLoading(true);
-    try {
-      const transaction = new Transaction();
 
-      transaction.moveCall({
-        target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::request_rematch`,
-        arguments: [transaction.object(gameState.id)],
-      });
-
-      signAndExecute(
-        { transaction },
-        {
-          onSuccess: (result) => {
-            console.log("Rematch requested:", result);
-            
-            // Check for RematchRequested event for immediate feedback
-            const resultWithEvents = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
-            let eventFound = false;
-            
-            if (resultWithEvents.events) {
-              const rematchEvent = resultWithEvents.events.find(
-                (event) => event.type && event.type.includes("RematchRequested")
-              );
-              
-              if (rematchEvent) {
-                eventFound = true;
-                alert("✅ Rematch request sent successfully! Waiting for opponent's response.");
-              }
-            }
-            
-            if (!eventFound) {
-              alert("Rematch request sent! Waiting for opponent's response.");
-            }
-            
-            // Update game state locally
-            setGameState({
-              ...gameState,
-              rematchRequestedBy: account.address,
-            });
-          },
-          onError: (error) => {
-            console.error("Failed to request rematch:", error);
-            alert("Failed to request rematch. Please try again.");
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Error requesting rematch:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const rejectRematch = async () => {
-    if (!account || !gameState) return;
-
-    setIsLoading(true);
-    try {
-      const transaction = new Transaction();
-
-      transaction.moveCall({
-        target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::reject_rematch`,
-        arguments: [transaction.object(gameState.id)],
-      });
-
-      signAndExecute(
-        { transaction },
-        {
-          onSuccess: (result) => {
-            console.log("Rematch rejected:", result);
-            
-            // Check for RematchRejected event for immediate feedback
-            const resultWithEvents = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
-            let eventFound = false;
-            
-            if (resultWithEvents.events) {
-              const rejectEvent = resultWithEvents.events.find(
-                (event) => event.type && event.type.includes("RematchRejected")
-              );
-              
-              if (rejectEvent) {
-                eventFound = true;
-                alert("❌ Rematch request declined successfully.");
-              }
-            }
-            
-            if (!eventFound) {
-              alert("Rematch request declined.");
-            }
-            
-            // Clear rematch request locally
-            setGameState({
-              ...gameState,
-              rematchRequestedBy: undefined,
-            });
-          },
-          onError: (error) => {
-            console.error("Failed to reject rematch:", error);
-            alert("Failed to reject rematch. Please try again.");
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Error rejecting rematch:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const acceptRematch = async () => {
-    if (!account || !gameState) return;
-
-    setIsLoading(true);
-    try {
-      const transaction = new Transaction();
-
-      // For competitive games, need to stake again
-      if (gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0) {
-        const [coin] = transaction.splitCoins(transaction.gas, [
-          transaction.pure.u64(gameState.stakeAmount),
-        ]);
-
-        transaction.moveCall({
-          target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::accept_rematch`,
-          arguments: [transaction.object(gameState.id), coin, transaction.object('0x6')],
-        });
-      } else {
-        // For friendly games, no stake needed
-        const [fakeCoin] = transaction.splitCoins(transaction.gas, [transaction.pure.u64(1)]);
-        
-        transaction.moveCall({
-          target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::accept_rematch`,
-          arguments: [transaction.object(gameState.id), fakeCoin, transaction.object('0x6')],
-        });
-      }
-
-      signAndExecute(
-        { transaction },
-        {
-          onSuccess: (result) => {
-            console.log("🎮 REMATCH ACCEPTED - Full result:", result);
-            
-            // Extract new game ID from RematchCreated event
-            const resultWithChanges = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
-            
-            console.log("🔍 Checking for events...");
-            if (resultWithChanges.events) {
-              console.log("📋 All events from rematch acceptance:", resultWithChanges.events);
-              
-              // Log each event with detailed info
-              resultWithChanges.events.forEach((event, index) => {
-                console.log(`📝 Event ${index}:`, {
-                  type: event.type,
-                  parsedJson: event.parsedJson,
-                  fullEvent: event
-                });
-              });
-              
-              console.log("🔎 Looking for RematchCreated event...");
-              const rematchEvent = resultWithChanges.events.find(
-                (event: { type?: string; parsedJson?: unknown }) => 
-                  event.type && event.type.includes("RematchCreated")
-              );
-              
-              console.log("🎯 Found RematchCreated event:", rematchEvent);
-              
-              if (rematchEvent && rematchEvent.parsedJson) {
-                const eventData = rematchEvent.parsedJson as { 
-                  new_game_id?: string;
-                  old_game_id?: string;
-                };
-                
-                console.log("📊 RematchCreated event data:", eventData);
-                console.log("🆔 new_game_id value:", eventData.new_game_id);
-                console.log("🆔 old_game_id value:", eventData.old_game_id);
-                
-                if (eventData.new_game_id) {
-                  console.log("✅ Found new_game_id, attempting navigation...");
-                  alert("Rematch accepted! Starting new game...");
-                  console.log("🚀 Navigating to new game:", eventData.new_game_id);
-                  
-                  // Add a small delay to ensure the alert is shown
-                  setTimeout(() => {
-                    router.push(`/game/${eventData.new_game_id}`);
-                  }, 100);
-                  return;
-                } else {
-                  console.log("❌ new_game_id is missing or empty");
-                }
-              } else {
-                console.log("❌ No RematchCreated event found or parsedJson is missing");
-              }
-              
-              console.log("🔍 Trying fallback: Looking for GameCreated event...");
-              const gameCreatedEvent = resultWithChanges.events.find(
-                (event: { type?: string; parsedJson?: unknown }) => 
-                  event.type && event.type.includes("GameCreated")
-              );
-              
-              console.log("🎯 Found GameCreated event:", gameCreatedEvent);
-              
-              if (gameCreatedEvent && gameCreatedEvent.parsedJson) {
-                const eventData = gameCreatedEvent.parsedJson as { game_id?: string };
-                console.log("📊 GameCreated event data:", eventData);
-                if (eventData.game_id) {
-                  console.log("✅ Found game_id from GameCreated, navigating...");
-                  alert("Rematch accepted! Starting new game...");
-                  console.log("🚀 Navigating to new game from GameCreated event:", eventData.game_id);
-                  router.push(`/game/${eventData.game_id}`);
-                  return;
-                }
-              }
-            } else {
-              console.log("❌ No events found in transaction result");
-            }
-            
-            // Fallback: Check objectChanges for new Game object
-            console.log("🔍 Trying fallback: Checking objectChanges...");
-            const resultWithObjectChanges = result as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-            if (resultWithObjectChanges.objectChanges) {
-              console.log("📋 Object changes found:", resultWithObjectChanges.objectChanges);
-              
-              const createdObjects = resultWithObjectChanges.objectChanges.filter(
-                (change: any) => change.type === "created" // eslint-disable-line @typescript-eslint/no-explicit-any
-              );
-              
-              console.log("🆕 Created objects:", createdObjects);
-              
-              const newGameObject = createdObjects.find((obj: { objectType?: string; objectId?: string }) => {
-                const isGameObject = obj.objectType && obj.objectType.includes("tic_tac::Game");
-                console.log(`🎯 Checking object:`, obj, `Is Game object:`, isGameObject);
-                return isGameObject;
-              });
-              
-              console.log("🎮 Found new Game object:", newGameObject);
-              
-              if (newGameObject && newGameObject.objectId) {
-                console.log("✅ Found new game from objectChanges, navigating...");
-                alert("Rematch accepted! Starting new game...");
-                console.log("🚀 Navigating to new game from object changes:", newGameObject.objectId);
-                router.push(`/game/${newGameObject.objectId}`);
-                return;
-              }
-            } else {
-              console.log("❌ No objectChanges found in transaction result");
-            }
-            
-            // Final fallback: reload current game
-            console.log("❌ No new game found through any method, reloading current game");
-            alert("Rematch accepted! Game updated.");
-            loadGame(gameState.id);
-          },
-          onError: (error) => {
-            console.error("Failed to accept rematch:", error);
-            alert("Failed to accept rematch. Please try again.");
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Error accepting rematch:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const selectGame = (game: GameState) => {
     setGameState(game);
@@ -1144,9 +845,6 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         onHome={resetGame}
         onCancelGame={cancelGame}
         onClaimTimeoutVictory={claimTimeoutVictory}
-        onRequestRematch={requestRematch}
-        onAcceptRematch={acceptRematch}
-        onRejectRematch={rejectRematch}
         isLoading={isLoading}
         currentPlayer={account.address}
       />
