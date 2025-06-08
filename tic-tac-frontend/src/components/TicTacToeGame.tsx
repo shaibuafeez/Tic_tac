@@ -78,16 +78,34 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
   // Use real-time sync when waiting for opponent (for both game types)
   // or when in active game to see opponent moves
+  // or when game is completed to detect rematch requests
   const shouldSync =
     gameState !== null &&
     !gameState.id.startsWith("game-") &&
     (gameState.status === GAME_STATUS.WAITING ||
-      gameState.status === GAME_STATUS.ACTIVE);
+      gameState.status === GAME_STATUS.ACTIVE ||
+      gameState.status === GAME_STATUS.COMPLETED);
 
   useGameSync({
     gameId: shouldSync ? gameState.id : null,
     onGameUpdate: (updatedGame) => {
-      console.log("Game sync update received:", updatedGame);
+      console.log("🔄 Game sync update received:", updatedGame);
+      
+      // Check if this is a rematch request update
+      if (updatedGame.rematchRequestedBy && !gameState?.rematchRequestedBy) {
+        console.log("🔔 NEW REMATCH REQUEST detected!", {
+          requestedBy: updatedGame.rematchRequestedBy,
+          currentPlayer: account?.address,
+          isForMe: updatedGame.rematchRequestedBy !== account?.address
+        });
+        
+        // Show notification if it's for the current player
+        if (updatedGame.rematchRequestedBy !== account?.address) {
+          // You could add a notification system here
+          console.log("🎮 Showing rematch request to current player");
+        }
+      }
+      
       if (
         updatedGame.status === GAME_STATUS.ACTIVE &&
         gameState?.status === GAME_STATUS.WAITING
@@ -101,7 +119,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       }
     },
     enabled: shouldSync,
-    interval: 3000,
+    interval: gameState?.status === GAME_STATUS.COMPLETED ? 2000 : 3000, // Poll faster for completed games to catch rematch requests
   });
 
   // Load game if gameId is provided
@@ -151,6 +169,12 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
       const fields = content.fields as Record<string, unknown>;
       console.log("Game fields from blockchain:", fields);
+      console.log("🔍 Rematch field details:", {
+        raw_field: fields.rematch_requested_by,
+        field_type: typeof fields.rematch_requested_by,
+        is_zero_address: fields.rematch_requested_by === "0x0000000000000000000000000000000000000000",
+        is_empty: !fields.rematch_requested_by
+      });
 
       // Parse the board array properly
       let board = Array(9).fill(GAME_CONSTANTS.MARK_EMPTY);
@@ -178,7 +202,9 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         lastMoveEpoch: Number(fields.last_move_ms) || 0,
         gameLink: `${window.location.origin}/game/${id}`,
         viewerLink: `${window.location.origin}/view/${id}`,
-        rematchRequestedBy: fields.rematch_requested_by ? String(fields.rematch_requested_by) : undefined,
+        rematchRequestedBy: fields.rematch_requested_by && String(fields.rematch_requested_by) !== "0x0000000000000000000000000000000000000000" 
+          ? String(fields.rematch_requested_by) 
+          : undefined,
         rematchAccepted: fields.rematch_accepted ? Boolean(fields.rematch_accepted) : false,
       };
 
