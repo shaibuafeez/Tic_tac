@@ -10,9 +10,11 @@ import {
   Loader2,
   Home,
   RefreshCw,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import { CONTRACT_CONFIG } from "@/config/constants";
+import { CONTRACT_CONFIG, MAX_LEADERBOARD_SIZE } from "@/config/constants";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface PlayerStats {
@@ -38,7 +40,11 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const suiClient = useSuiClient();
+  
+  const ITEMS_PER_PAGE = 20;
+  const totalPages = Math.ceil((leaderboard?.topPlayers.length || 0) / ITEMS_PER_PAGE);
 
   const fetchLeaderboard = useCallback(async (refresh = false) => {
     if (refresh) {
@@ -148,7 +154,7 @@ export default function LeaderboardPage() {
         }
         return b.gamesWon - a.gamesWon;
       })
-      .slice(0, 50); // Show top 50 players
+      .slice(0, MAX_LEADERBOARD_SIZE); // Show top 100 players
 
     return {
       topPlayers,
@@ -342,16 +348,20 @@ export default function LeaderboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {leaderboard?.topPlayers.map((player, index) => (
-                  <tr
-                    key={player.player}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {getRankIcon(index + 1)}
-                      </div>
-                    </td>
+                {leaderboard?.topPlayers
+                  .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                  .map((player, index) => {
+                    const actualRank = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+                    return (
+                      <tr
+                        key={player.player}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {getRankIcon(actualRank)}
+                          </div>
+                        </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">
                         {truncateAddress(player.player)}
@@ -405,7 +415,8 @@ export default function LeaderboardPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -415,6 +426,50 @@ export default function LeaderboardPage() {
             <div className="p-8 text-center text-gray-500">
               <p className="text-lg font-medium mb-2">No games completed yet</p>
               <p className="text-sm">Be the first to play and top the leaderboard!</p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {leaderboard?.topPlayers && leaderboard.topPlayers.length > ITEMS_PER_PAGE && (
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to{" "}
+                  {Math.min(currentPage * ITEMS_PER_PAGE, leaderboard.topPlayers.length)} of{" "}
+                  {leaderboard.topPlayers.length} players
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 text-sm rounded-lg transition-all ${
+                          currentPage === page
+                            ? "bg-black text-white"
+                            : "text-gray-600 hover:text-black border border-gray-300 hover:border-black"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

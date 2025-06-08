@@ -505,7 +505,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
               ...gameState,
               board: newBoard,
               turn: gameState.turn + 1,
-              lastMoveEpoch: Math.floor(Date.now() / 1000), // Current blockchain epoch in seconds
+              lastMoveEpoch: Date.now(), // Current time in milliseconds (matching blockchain storage)
             });
           },
           onError: (error) => {
@@ -571,41 +571,45 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     if (!account || !gameState) return;
 
     try {
-      // Get current blockchain epoch to compare with game state
-      const currentBlockchainTime = Math.floor(Date.now() / 1000); // Convert to seconds (epoch format)
-      const lastMoveEpoch = gameState.lastMoveEpoch || 0;
-      const timeElapsedEpochs = currentBlockchainTime - lastMoveEpoch;
-      const oneHourInEpochs = 3600; // 1 hour = 3600 seconds (matches MOVE_TIMEOUT_EPOCHS)
+      // Get current time and convert lastMoveEpoch from milliseconds to seconds
+      const currentTimeMs = Date.now();
+      const currentTimeSeconds = Math.floor(currentTimeMs / 1000);
+      const lastMoveMs = gameState.lastMoveEpoch || 0; // This is in milliseconds from blockchain
+      const lastMoveSeconds = Math.floor(lastMoveMs / 1000);
+      const timeElapsedSeconds = currentTimeSeconds - lastMoveSeconds;
+      const timeoutDurationSeconds = 900; // 15 minutes = 900 seconds (MOVE_TIMEOUT_MS / 1000)
       
       console.log("Debug timeout claim:", {
-        currentBlockchainTime,
-        lastMoveEpoch,
-        timeElapsedEpochs,
-        oneHourInEpochs,
-        hasEnoughTimePassed: timeElapsedEpochs >= oneHourInEpochs,
+        currentTimeMs,
+        currentTimeSeconds,
+        lastMoveMs,
+        lastMoveSeconds,
+        timeElapsedSeconds,
+        timeoutDurationSeconds,
+        hasEnoughTimePassed: timeElapsedSeconds >= timeoutDurationSeconds,
         gameState,
         currentPlayer: account.address,
         isPlayerX: gameState.x === account.address,
         isPlayerO: gameState.o === account.address,
         currentTurnPlayer: gameState.turn % 2 === 0 ? gameState.x : gameState.o,
-        note: "All times synchronized with blockchain epochs",
+        note: "Times converted from milliseconds to seconds for comparison",
       });
 
-      // First check if we have valid epoch data
-      if (!lastMoveEpoch || lastMoveEpoch === 0) {
+      // First check if we have valid timing data
+      if (!lastMoveMs || lastMoveMs === 0) {
         alert("Game timing data is invalid. Please refresh and try again.");
         return;
       }
 
       // Check for potential underflow condition
-      if (currentBlockchainTime < lastMoveEpoch) {
+      if (currentTimeSeconds < lastMoveSeconds) {
         alert("Timing error detected. Please refresh the page and try again.");
         return;
       }
 
       // Validate conditions before making blockchain call
-      if (timeElapsedEpochs < oneHourInEpochs) {
-        const remainingSeconds = oneHourInEpochs - timeElapsedEpochs;
+      if (timeElapsedSeconds < timeoutDurationSeconds) {
+        const remainingSeconds = timeoutDurationSeconds - timeElapsedSeconds;
         const remainingMinutes = Math.ceil(remainingSeconds / 60);
         alert(`Timeout not reached yet. Please wait ${remainingMinutes} more minutes. (${remainingSeconds} seconds remaining)`);
         return;

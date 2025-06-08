@@ -19,7 +19,7 @@ interface UseGameTimerReturn {
 export function useGameTimer({
   gameStatus,
   lastMoveEpoch,
-  timeoutDuration = 3600, // 1 hour in seconds (matching blockchain MOVE_TIMEOUT_EPOCHS)
+  timeoutDuration = 900, // 15 minutes in seconds (matching blockchain MOVE_TIMEOUT_MS / 1000)
 }: UseGameTimerProps): UseGameTimerReturn {
   const [currentTime, setCurrentTime] = useState(() => Date.now());
 

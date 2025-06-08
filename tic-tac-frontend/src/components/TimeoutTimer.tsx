@@ -4,17 +4,15 @@ import { useState, useEffect } from 'react';
 import { Clock, AlertTriangle } from 'lucide-react';
 
 interface TimeoutTimerProps {
-  lastMoveEpoch: number;
-  currentEpoch: number;
+  lastMoveMs: number; // Last move timestamp in milliseconds
   isOpponentTurn: boolean;
   onTimeoutReached?: () => void;
 }
 
-const TIMEOUT_EPOCHS = 60; // 1 hour
+const TIMEOUT_MS = 900000; // 15 minutes in milliseconds
 
 export function TimeoutTimer({ 
-  lastMoveEpoch, 
-  currentEpoch, 
+  lastMoveMs, 
   isOpponentTurn,
   onTimeoutReached 
 }: TimeoutTimerProps) {
@@ -22,28 +20,35 @@ export function TimeoutTimer({
   const [canClaimVictory, setCanClaimVictory] = useState(false);
 
   useEffect(() => {
-    const epochsPassed = currentEpoch - lastMoveEpoch;
-    const epochsRemaining = Math.max(0, TIMEOUT_EPOCHS - epochsPassed);
-    setTimeRemaining(epochsRemaining);
-    
-    const isTimeout = epochsPassed >= TIMEOUT_EPOCHS;
-    setCanClaimVictory(isTimeout && isOpponentTurn);
-    
-    if (isTimeout && isOpponentTurn && onTimeoutReached) {
-      onTimeoutReached();
-    }
-  }, [lastMoveEpoch, currentEpoch, isOpponentTurn, onTimeoutReached]);
+    const updateTimer = () => {
+      const currentMs = Date.now();
+      const elapsedMs = currentMs - lastMoveMs;
+      const remainingMs = Math.max(0, TIMEOUT_MS - elapsedMs);
+      setTimeRemaining(remainingMs);
+      
+      const isTimeout = elapsedMs >= TIMEOUT_MS;
+      setCanClaimVictory(isTimeout && isOpponentTurn);
+      
+      if (isTimeout && isOpponentTurn && onTimeoutReached) {
+        onTimeoutReached();
+      }
+    };
 
-  // Convert epochs to human readable time (assuming 1 epoch ≈ 1 minute)
-  const formatTime = (epochs: number) => {
-    const minutes = epochs;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [lastMoveMs, isOpponentTurn, onTimeoutReached]);
+
+  // Convert milliseconds to human readable time
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
     
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
+    if (minutes > 0) {
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
-    return `${mins}m`;
+    return `0:${seconds.toString().padStart(2, '0')}`;
   };
 
   if (!isOpponentTurn) return null;
