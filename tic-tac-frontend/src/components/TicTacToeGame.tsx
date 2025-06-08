@@ -23,6 +23,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useLanguage } from "@/hooks/useLanguage";
+import { isZeroAddress } from "@/utils/sui-helpers";
 
 export interface GameState {
   id: string;
@@ -182,7 +183,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       console.log("🔍 Rematch field details:", {
         raw_field: fields.rematch_requested_by,
         field_type: typeof fields.rematch_requested_by,
-        is_zero_address: fields.rematch_requested_by === "0x0000000000000000000000000000000000000000",
+        is_zero_address: isZeroAddress(fields.rematch_requested_by),
         is_empty: !fields.rematch_requested_by
       });
 
@@ -212,7 +213,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         lastMoveEpoch: Number(fields.last_move_ms) || 0,
         gameLink: `${window.location.origin}/game/${id}`,
         viewerLink: `${window.location.origin}/view/${id}`,
-        rematchRequestedBy: fields.rematch_requested_by && String(fields.rematch_requested_by) !== "0x0000000000000000000000000000000000000000" 
+        rematchRequestedBy: !isZeroAddress(fields.rematch_requested_by)
           ? String(fields.rematch_requested_by) 
           : undefined,
         rematchAccepted: fields.rematch_accepted ? Boolean(fields.rematch_accepted) : false,

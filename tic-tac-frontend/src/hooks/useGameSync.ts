@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useSuiClient } from '@mysten/dapp-kit';
 import { GameState } from '@/components/TicTacToeGame';
+import { isZeroAddress } from '@/utils/sui-helpers';
 
 interface UseGameSyncProps {
   gameId: string | null;
@@ -45,6 +46,19 @@ export function useGameSync({
       if (content && 'fields' in content) {
         const fields = content.fields as Record<string, unknown>;
         
+        // Debug rematch field parsing
+        console.log('🔍 useGameSync - Raw rematch field data:', {
+          raw_field: fields.rematch_requested_by,
+          field_type: typeof fields.rematch_requested_by,
+          is_zero_address_full: fields.rematch_requested_by === "0x0000000000000000000000000000000000000000",
+          is_zero_address_short: fields.rematch_requested_by === "0x0",
+          is_at_zero: fields.rematch_requested_by === "@0x0",
+          is_empty: !fields.rematch_requested_by,
+          is_zero_helper: isZeroAddress(fields.rematch_requested_by),
+          stringified: String(fields.rematch_requested_by),
+          gameId: gameId
+        });
+        
         // Create a hash of the current state to detect changes
         const stateHash = JSON.stringify({
           board: fields.board,
@@ -52,10 +66,21 @@ export function useGameSync({
           status: fields.status,
           winner: fields.winner,
           last_move_ms: fields.last_move_ms,
+          rematch_requested_by: fields.rematch_requested_by,
+          rematch_accepted: fields.rematch_accepted,
         });
 
         // Only update if state has changed
         if (stateHash !== lastUpdateRef.current) {
+          console.log('🔄 useGameSync - State change detected:', {
+            gameId,
+            previousHash: lastUpdateRef.current.slice(0, 50) + '...',
+            newHash: stateHash.slice(0, 50) + '...',
+            rematchRequestedBy: fields.rematch_requested_by,
+            parsedRematchRequestedBy: !isZeroAddress(fields.rematch_requested_by) ? String(fields.rematch_requested_by) : undefined,
+            isCompletedGame: Number(fields.status) === 2, // GAME_STATUS.COMPLETED
+            fullFields: fields
+          });
           lastUpdateRef.current = stateHash;
           
           // Parse the board array properly
@@ -78,6 +103,10 @@ export function useGameSync({
             lastMoveEpoch: Number(fields.last_move_ms) || 0,
             gameLink: `${window.location.origin}/game/${gameId}`,
             viewerLink: `${window.location.origin}/view/${gameId}`,
+            rematchRequestedBy: !isZeroAddress(fields.rematch_requested_by)
+              ? String(fields.rematch_requested_by) 
+              : undefined,
+            rematchAccepted: fields.rematch_accepted ? Boolean(fields.rematch_accepted) : false,
           };
 
           onGameUpdate(gameState);

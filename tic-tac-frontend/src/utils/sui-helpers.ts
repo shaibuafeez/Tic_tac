@@ -1,5 +1,16 @@
 import { SuiTransactionBlockResponse } from '@mysten/sui/client';
 
+// Helper function to check if an address is the zero address
+export const isZeroAddress = (address: unknown): boolean => {
+  if (!address) return true;
+  const addrStr = String(address);
+  return addrStr === '0x0' || 
+         addrStr === '@0x0' || 
+         addrStr === '0x0000000000000000000000000000000000000000' ||
+         addrStr === '0x00' ||
+         /^0x0+$/.test(addrStr); // Matches any number of zeros after 0x
+};
+
 export function parseTransactionEffects(result: SuiTransactionBlockResponse) {
   // Handle both digest-only results and full results
   if (typeof result === 'object' && result.effects) {
