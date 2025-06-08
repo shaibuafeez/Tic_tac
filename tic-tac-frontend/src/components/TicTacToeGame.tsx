@@ -715,7 +715,26 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         {
           onSuccess: (result) => {
             console.log("Rematch requested:", result);
-            alert("Rematch request sent! Waiting for opponent's response.");
+            
+            // Check for RematchRequested event for immediate feedback
+            const resultWithEvents = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
+            let eventFound = false;
+            
+            if (resultWithEvents.events) {
+              const rematchEvent = resultWithEvents.events.find(
+                (event) => event.type && event.type.includes("RematchRequested")
+              );
+              
+              if (rematchEvent) {
+                eventFound = true;
+                alert("✅ Rematch request sent successfully! Waiting for opponent's response.");
+              }
+            }
+            
+            if (!eventFound) {
+              alert("Rematch request sent! Waiting for opponent's response.");
+            }
+            
             // Update game state locally
             setGameState({
               ...gameState,
@@ -730,6 +749,62 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       );
     } catch (error) {
       console.error("Error requesting rematch:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const rejectRematch = async () => {
+    if (!account || !gameState) return;
+
+    setIsLoading(true);
+    try {
+      const transaction = new Transaction();
+
+      transaction.moveCall({
+        target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::reject_rematch`,
+        arguments: [transaction.object(gameState.id)],
+      });
+
+      signAndExecute(
+        { transaction },
+        {
+          onSuccess: (result) => {
+            console.log("Rematch rejected:", result);
+            
+            // Check for RematchRejected event for immediate feedback
+            const resultWithEvents = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
+            let eventFound = false;
+            
+            if (resultWithEvents.events) {
+              const rejectEvent = resultWithEvents.events.find(
+                (event) => event.type && event.type.includes("RematchRejected")
+              );
+              
+              if (rejectEvent) {
+                eventFound = true;
+                alert("❌ Rematch request declined successfully.");
+              }
+            }
+            
+            if (!eventFound) {
+              alert("Rematch request declined.");
+            }
+            
+            // Clear rematch request locally
+            setGameState({
+              ...gameState,
+              rematchRequestedBy: undefined,
+            });
+          },
+          onError: (error) => {
+            console.error("Failed to reject rematch:", error);
+            alert("Failed to reject rematch. Please try again.");
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error rejecting rematch:", error);
     } finally {
       setIsLoading(false);
     }
@@ -951,6 +1026,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         onClaimTimeoutVictory={claimTimeoutVictory}
         onRequestRematch={requestRematch}
         onAcceptRematch={acceptRematch}
+        onRejectRematch={rejectRematch}
         isLoading={isLoading}
         currentPlayer={account.address}
       />

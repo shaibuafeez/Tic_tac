@@ -50,6 +50,7 @@ module tic_tac::tic_tac {
     const ENotPlayer: u64 = 14;
     const ERematchAlreadyRequested: u64 = 15;
     const ENoRematchRequest: u64 = 16;
+    const ECannotRejectOwnRequest: u64 = 17;
 
     // ======== Structs ========
     
@@ -142,6 +143,12 @@ module tic_tac::tic_tac {
         game_id: address,
         requester: address,
         opponent: address,
+    }
+
+    public struct RematchRejected has copy, drop {
+        game_id: address,
+        rejector: address,
+        original_requester: address,
     }
 
     public struct RematchCreated has copy, drop {
@@ -572,6 +579,36 @@ module tic_tac::tic_tac {
             game_id: object::uid_to_address(&game.id),
             requester: sender,
             opponent,
+        });
+    }
+    
+    public fun reject_rematch(
+        game: &mut Game,
+        ctx: &mut TxContext
+    ) {
+        // Game must be completed
+        assert!(game.status == STATUS_COMPLETED, EGameNotCompleted);
+        
+        // Must have an active rematch request
+        assert!(game.rematch_requested_by != @0x0, ENoRematchRequest);
+        
+        // Rejector must be one of the players
+        let sender = tx_context::sender(ctx);
+        assert!(sender == game.x || sender == game.o, ENotPlayer);
+        
+        // Cannot reject your own request
+        assert!(sender != game.rematch_requested_by, ECannotRejectOwnRequest);
+        
+        // Store the original requester before clearing
+        let original_requester = game.rematch_requested_by;
+        
+        // Clear rematch request
+        game.rematch_requested_by = @0x0;
+        
+        event::emit(RematchRejected {
+            game_id: object::uid_to_address(&game.id),
+            rejector: sender,
+            original_requester,
         });
     }
     

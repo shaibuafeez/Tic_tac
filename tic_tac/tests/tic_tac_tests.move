@@ -636,6 +636,195 @@ module tic_tac::tic_tac_tests {
         clock::destroy_for_testing(clock);
         test_scenario::end(scenario);
     }
+    
+    #[test]
+    fun test_reject_rematch() {
+        let mut scenario = test_scenario::begin(PLAYER_X);
+        let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+        
+        // Initialize
+        {
+            tic_tac::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Create and complete a game
+        {
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            let (_game_link, _viewer_link) = tic_tac::create_competitive_game(
+                stake,
+                &clock,
+                test_scenario::ctx(&mut scenario)
+            );
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        
+        // Player O joins
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            tic_tac::join_competitive_game(&mut game, stake, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Complete the game by making X win
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            
+            // X wins with diagonal line (0,4,8)
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(&mut scenario)); // X
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 1, test_scenario::ctx(&mut scenario)); // O
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 1, test_scenario::ctx(&mut scenario)); // X
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 2, test_scenario::ctx(&mut scenario)); // O
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 2, 2, test_scenario::ctx(&mut scenario)); // X wins!
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Player X requests rematch
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            tic_tac::request_rematch(&mut game, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        
+        // Player O rejects the rematch
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            tic_tac::reject_rematch(&mut game, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        
+        clock::destroy_for_testing(clock);
+        test_scenario::end(scenario);
+    }
+    
+    #[test]
+    #[expected_failure(abort_code = 17)] // ECannotRejectOwnRequest
+    fun test_cannot_reject_own_rematch() {
+        let mut scenario = test_scenario::begin(PLAYER_X);
+        let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+        
+        // Initialize
+        {
+            tic_tac::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Create and complete a game
+        {
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            let (_game_link, _viewer_link) = tic_tac::create_competitive_game(
+                stake,
+                &clock,
+                test_scenario::ctx(&mut scenario)
+            );
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        
+        // Player O joins
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            tic_tac::join_competitive_game(&mut game, stake, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Complete the game by making X win
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            
+            // X wins with diagonal line (0,4,8)
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(&mut scenario)); // X
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 1, test_scenario::ctx(&mut scenario)); // O
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 1, test_scenario::ctx(&mut scenario)); // X
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 2, test_scenario::ctx(&mut scenario)); // O
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 2, 2, test_scenario::ctx(&mut scenario)); // X wins!
+            test_scenario::return_shared(treasury);
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Player X requests rematch
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            tic_tac::request_rematch(&mut game, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Player X tries to reject their own rematch request (should fail)
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            tic_tac::reject_rematch(&mut game, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        
+        clock::destroy_for_testing(clock);
+        test_scenario::end(scenario);
+    }
 
     #[test]
     fun test_cancel_expired_game() {

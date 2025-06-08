@@ -28,6 +28,7 @@ interface GameBoardProps {
   onClaimTimeoutVictory?: () => void;
   onRequestRematch?: () => void;
   onAcceptRematch?: () => void;
+  onRejectRematch?: () => void;
   isLoading: boolean;
   currentPlayer: string;
 }
@@ -41,6 +42,7 @@ export function GameBoard({
   onClaimTimeoutVictory,
   onRequestRematch,
   onAcceptRematch,
+  onRejectRematch,
   isLoading,
   currentPlayer,
 }: GameBoardProps) {
@@ -550,13 +552,22 @@ export function GameBoard({
                       Stake: {(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI
                     </p>
                   )}
-                  <button
-                    onClick={onAcceptRematch}
-                    disabled={isLoading}
-                    className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    ✓ Accept Rematch
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={onAcceptRematch}
+                      disabled={isLoading}
+                      className="flex-1 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ✓ Accept
+                    </button>
+                    <button
+                      onClick={onRejectRematch}
+                      disabled={isLoading}
+                      className="flex-1 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ✗ Decline
+                    </button>
+                  </div>
                 </div>
               )
             ) : (
