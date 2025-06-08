@@ -90,6 +90,15 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     gameId: shouldSync ? gameState.id : null,
     onGameUpdate: (updatedGame) => {
       console.log("🔄 Game sync update received:", updatedGame);
+      console.log("📊 Game sync - Current state vs Updated:", {
+        currentStatus: gameState?.status,
+        updatedStatus: updatedGame.status,
+        currentRematchRequestedBy: gameState?.rematchRequestedBy,
+        updatedRematchRequestedBy: updatedGame.rematchRequestedBy,
+        gameCompleted: updatedGame.status === GAME_STATUS.COMPLETED,
+        hasRematchRequest: !!updatedGame.rematchRequestedBy,
+        currentPlayer: account?.address
+      });
       
       // Check if this is a rematch request update
       if (updatedGame.rematchRequestedBy && !gameState?.rematchRequestedBy) {
@@ -103,6 +112,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         if (updatedGame.rematchRequestedBy !== account?.address) {
           // You could add a notification system here
           console.log("🎮 Showing rematch request to current player");
+          alert(`🔄 ${updatedGame.rematchRequestedBy.slice(0, 6)}...${updatedGame.rematchRequestedBy.slice(-4)} wants a rematch!`);
         }
       }
       
