@@ -6,7 +6,7 @@ module tic_tac::leaderboard {
     use std::vector;
 
     // Constants
-    const MAX_LEADERBOARD_SIZE: u64 = 20;
+    const MAX_LEADERBOARD_SIZE: u64 = 100;
 
     // Errors
     const ENotAuthorized: u64 = 0;

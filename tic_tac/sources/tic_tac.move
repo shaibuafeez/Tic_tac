@@ -30,7 +30,7 @@ module tic_tac::tic_tac {
     const BPS_BASE: u64 = 10000;
     
     // Timeout constants
-    const MOVE_TIMEOUT_MS: u64 = 3_600_000; // 1 hour in milliseconds
+    const MOVE_TIMEOUT_MS: u64 = 900_000; // 15 minutes in milliseconds
 
     // ======== Errors ========
     const EInvalidTurn: u64 = 0;
@@ -46,6 +46,10 @@ module tic_tac::tic_tac {
     const EGameNotActive: u64 = 10;
     const ETimeoutNotReached: u64 = 11;
     const ECannotClaimOwnTimeout: u64 = 12;
+    const EGameNotCompleted: u64 = 13;
+    const ENotPlayer: u64 = 14;
+    const ERematchAlreadyRequested: u64 = 15;
+    const ENoRematchRequest: u64 = 16;
 
     // ======== Structs ========
     
@@ -79,6 +83,8 @@ module tic_tac::tic_tac {
         created_at_ms: u64,
         completed_at_ms: u64,
         last_move_ms: u64,
+        rematch_requested_by: address, // 0x0 if no rematch requested
+        rematch_accepted: bool,
     }
 
     // Trophy NFT
@@ -130,6 +136,20 @@ module tic_tac::tic_tac {
         winner: address,
         loser: address,
         time_elapsed: u64,
+    }
+
+    public struct RematchRequested has copy, drop {
+        game_id: address,
+        requester: address,
+        opponent: address,
+    }
+
+    public struct RematchCreated has copy, drop {
+        old_game_id: address,
+        new_game_id: address,
+        player_x: address,
+        player_o: address,
+        stake_amount: u64,
     }
 
     // ======== Init Function ========
@@ -188,6 +208,8 @@ module tic_tac::tic_tac {
             created_at_ms: current_time,
             completed_at_ms: 0,
             last_move_ms: current_time,
+            rematch_requested_by: @0x0,
+            rematch_accepted: false,
         };
 
         event::emit(GameCreated {
@@ -239,6 +261,8 @@ module tic_tac::tic_tac {
             created_at_ms: current_time,
             completed_at_ms: 0,
             last_move_ms: current_time,
+            rematch_requested_by: @0x0,
+            rematch_accepted: false,
         };
 
         event::emit(GameCreated {
@@ -520,6 +544,116 @@ module tic_tac::tic_tac {
             loser: current_turn_player,
             time_elapsed: time_since_last_move,
         });
+    }
+
+    // ======== Rematch Functions ========
+    
+    public fun request_rematch(
+        game: &mut Game,
+        ctx: &mut TxContext
+    ) {
+        // Game must be completed
+        assert!(game.status == STATUS_COMPLETED, EGameNotCompleted);
+        
+        // Requester must be one of the players
+        let sender = tx_context::sender(ctx);
+        assert!(sender == game.x || sender == game.o, ENotPlayer);
+        
+        // No existing rematch request
+        assert!(game.rematch_requested_by == @0x0, ERematchAlreadyRequested);
+        
+        // Set rematch request
+        game.rematch_requested_by = sender;
+        
+        // Determine opponent
+        let opponent = if (sender == game.x) { game.o } else { game.x };
+        
+        event::emit(RematchRequested {
+            game_id: object::uid_to_address(&game.id),
+            requester: sender,
+            opponent,
+        });
+    }
+    
+    public fun accept_rematch(
+        game: &mut Game,
+        stake: Coin<SUI>,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ): (String, String) {
+        // Game must be completed
+        assert!(game.status == STATUS_COMPLETED, EGameNotCompleted);
+        
+        // Must have a rematch request
+        assert!(game.rematch_requested_by != @0x0, ENoRematchRequest);
+        
+        // Acceptor must be the other player
+        let sender = tx_context::sender(ctx);
+        assert!(sender == game.x || sender == game.o, ENotPlayer);
+        assert!(sender != game.rematch_requested_by, EInvalidTurn);
+        
+        // For competitive games, check stake and use it
+        let prize_pool = if (game.mode == MODE_COMPETITIVE) {
+            assert!(coin::value(&stake) >= game.stake_amount, EInsufficientStake);
+            coin::into_balance(stake)
+        } else {
+            // For friendly games, return the stake (should be 0 value)
+            transfer::public_transfer(stake, sender);
+            balance::zero()
+        };
+        
+        // Create new game with swapped positions
+        let new_game_id = object::new(ctx);
+        let new_game_address = object::uid_to_address(&new_game_id);
+        
+        let game_link = generate_game_link(new_game_address, false);
+        let viewer_link = generate_game_link(new_game_address, true);
+        
+        let current_time = clock::timestamp_ms(clock);
+        
+        // Swap X and O positions for rematch
+        let new_x = game.o;
+        let new_o = game.x;
+        
+        let new_game = Game {
+            id: new_game_id,
+            board: vector[
+                MARK_EMPTY, MARK_EMPTY, MARK_EMPTY,
+                MARK_EMPTY, MARK_EMPTY, MARK_EMPTY,
+                MARK_EMPTY, MARK_EMPTY, MARK_EMPTY
+            ],
+            turn: 0,
+            x: new_x,
+            o: new_o,
+            mode: game.mode,
+            status: STATUS_ACTIVE, // Start active since both players are ready
+            stake_amount: game.stake_amount,
+            prize_pool,
+            creator: game.rematch_requested_by,
+            winner: @0x0,
+            game_link,
+            viewer_link,
+            created_at_ms: current_time,
+            completed_at_ms: 0,
+            last_move_ms: current_time,
+            rematch_requested_by: @0x0,
+            rematch_accepted: false,
+        };
+        
+        // Mark rematch as accepted in old game
+        game.rematch_accepted = true;
+        
+        event::emit(RematchCreated {
+            old_game_id: object::uid_to_address(&game.id),
+            new_game_id: new_game_address,
+            player_x: new_x,
+            player_o: new_o,
+            stake_amount: game.stake_amount,
+        });
+        
+        transfer::share_object(new_game);
+        
+        (game_link, viewer_link)
     }
 
     // ======== Admin Functions ========

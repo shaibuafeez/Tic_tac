@@ -4,6 +4,7 @@ module tic_tac::tic_tac_tests {
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
     use sui::test_utils;
+    use sui::clock::{Self, Clock};
     use tic_tac::tic_tac::{Self, Game, Treasury, AdminCap, Trophy};
     use std::string;
 
@@ -57,19 +58,24 @@ module tic_tac::tic_tac_tests {
         
         // Create friendly game
         {
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
             let (game_link, viewer_link) = tic_tac::create_friendly_game(
+                &clock,
                 test_scenario::ctx(&mut scenario)
             );
             assert!(game_link == string::utf8(b"game_link_placeholder"), 0);
             assert!(viewer_link == string::utf8(b"viewer_link_placeholder"), 1);
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_O);
         
         // Join friendly game
         {
             let mut game = test_scenario::take_shared<Game>(&scenario);
-            tic_tac::join_friendly_game(&mut game, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::join_friendly_game(&mut game, &clock, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_X);
         
@@ -79,9 +85,11 @@ module tic_tac::tic_tac_tests {
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
             // X plays (0,0)
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 0, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_O);
         
@@ -90,7 +98,9 @@ module tic_tac::tic_tac_tests {
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
             // O plays (1,1)
-            tic_tac::place_mark(&mut game, &mut treasury, 1, 1, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 1, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -101,7 +111,9 @@ module tic_tac::tic_tac_tests {
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
             // X plays (0,1)
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 1, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 1, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -112,7 +124,9 @@ module tic_tac::tic_tac_tests {
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
             // O plays (2,2)
-            tic_tac::place_mark(&mut game, &mut treasury, 2, 2, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 2, 2, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -123,7 +137,9 @@ module tic_tac::tic_tac_tests {
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
             // X plays (0,2) - X wins!
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 2, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 2, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
             
             // Check game status
             let (status, winner, mode, stake) = tic_tac::get_game_status(&game);
@@ -161,10 +177,13 @@ module tic_tac::tic_tac_tests {
         // Create competitive game with stake
         {
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
             let (game_link, viewer_link) = tic_tac::create_competitive_game(
                 stake,
+                &clock,
                 test_scenario::ctx(&mut scenario)
             );
+            clock::destroy_for_testing(clock);
             assert!(game_link == string::utf8(b"game_link_placeholder"), 0);
             assert!(viewer_link == string::utf8(b"viewer_link_placeholder"), 1);
         };
@@ -174,8 +193,10 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(&scenario);
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
-            tic_tac::join_competitive_game(&mut game, stake, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::join_competitive_game(&mut game, stake, &clock, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_X);
         
@@ -217,10 +238,13 @@ module tic_tac::tic_tac_tests {
         };
         test_scenario::next_tx(&mut scenario, PLAYER_X);
         
+        // Create a shared clock for consistent timestamps
+        let mut clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+        
         // Create competitive game
         {
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
-            tic_tac::create_competitive_game(stake, test_scenario::ctx(&mut scenario));
+            tic_tac::create_competitive_game(stake, &clock, test_scenario::ctx(&mut scenario));
         };
         test_scenario::next_tx(&mut scenario, PLAYER_O);
         
@@ -228,17 +252,13 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(&scenario);
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
-            tic_tac::join_competitive_game(&mut game, stake, test_scenario::ctx(&mut scenario));
+            tic_tac::join_competitive_game(&mut game, stake, &clock, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
         };
         
-        // Fast forward time by more than 1 hour (3600+ epochs)
-        test_scenario::next_epoch(&mut scenario, PLAYER_O);
-        let mut i = 0;
-        while (i < 3601) {
-            test_scenario::next_epoch(&mut scenario, PLAYER_O);
-            i = i + 1;
-        };
+        // Fast forward time by more than 1 hour (3600000+ milliseconds)
+        clock::increment_for_testing(&mut clock, 3600001);
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
         
         // Player O claims timeout victory (X didn't move)
         {
@@ -248,6 +268,7 @@ module tic_tac::tic_tac_tests {
             tic_tac::claim_timeout_victory(
                 &mut game, 
                 &mut treasury, 
+                &clock,
                 test_scenario::ctx(&mut scenario)
             );
             
@@ -275,6 +296,9 @@ module tic_tac::tic_tac_tests {
             test_scenario::return_to_sender(&scenario, trophy);
         };
         
+        // Destroy the clock
+        clock::destroy_for_testing(clock);
+        
         test_scenario::end(scenario);
     }
 
@@ -293,9 +317,11 @@ module tic_tac::tic_tac_tests {
             let mut game = test_scenario::take_shared<Game>(&scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 0, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_X);
         
@@ -304,7 +330,9 @@ module tic_tac::tic_tac_tests {
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
             // This should fail - not X's turn
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 1, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 1, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -325,9 +353,11 @@ module tic_tac::tic_tac_tests {
             let mut game = test_scenario::take_shared<Game>(&scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 0, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_O);
         
@@ -337,7 +367,9 @@ module tic_tac::tic_tac_tests {
             let mut treasury = test_scenario::take_shared<Treasury>(&scenario);
             
             // This should fail - cell occupied
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 0, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -358,7 +390,9 @@ module tic_tac::tic_tac_tests {
         
         // Create game
         {
-            tic_tac::create_friendly_game(test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::create_friendly_game(&clock, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_X);
         
@@ -366,8 +400,10 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(&scenario);
             // This should fail
-            tic_tac::join_friendly_game(&mut game, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::join_friendly_game(&mut game, &clock, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
+            clock::destroy_for_testing(clock);
         };
         
         test_scenario::end(scenario);
@@ -387,7 +423,9 @@ module tic_tac::tic_tac_tests {
         // Create competitive game
         {
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
-            tic_tac::create_competitive_game(stake, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::create_competitive_game(stake, &clock, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_O);
         
@@ -396,8 +434,10 @@ module tic_tac::tic_tac_tests {
             let mut game = test_scenario::take_shared<Game>(&scenario);
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT / 2, test_scenario::ctx(&mut scenario));
             // This should fail
-            tic_tac::join_competitive_game(&mut game, stake, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::join_competitive_game(&mut game, stake, &clock, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(game);
+            clock::destroy_for_testing(clock);
         };
         
         test_scenario::end(scenario);
@@ -408,7 +448,29 @@ module tic_tac::tic_tac_tests {
     fun test_claim_timeout_too_early() {
         let mut scenario = test_scenario::begin(PLAYER_X);
         
-        setup_active_game(&mut scenario);
+        // Initialize
+        {
+            tic_tac::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Create a clock for consistent timestamps
+        let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+        
+        // Create competitive game
+        {
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            tic_tac::create_competitive_game(stake, &clock, test_scenario::ctx(&mut scenario));
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        
+        // Join game
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            tic_tac::join_competitive_game(&mut game, stake, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
         test_scenario::next_tx(&mut scenario, PLAYER_O);
         
         // Try to claim timeout immediately (should fail)
@@ -420,6 +482,7 @@ module tic_tac::tic_tac_tests {
             tic_tac::claim_timeout_victory(
                 &mut game, 
                 &mut treasury, 
+                &clock,
                 test_scenario::ctx(&mut scenario)
             );
             
@@ -427,6 +490,7 @@ module tic_tac::tic_tac_tests {
             test_scenario::return_shared(treasury);
         };
         
+        clock::destroy_for_testing(clock);
         test_scenario::end(scenario);
     }
 
@@ -474,6 +538,106 @@ module tic_tac::tic_tac_tests {
     }
 
     #[test]
+    fun test_rematch_request() {
+        let mut scenario = test_scenario::begin(PLAYER_X);
+        let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+        
+        // Initialize
+        {
+            tic_tac::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Setup and complete a competitive game
+        setup_and_complete_competitive_game(&mut scenario);
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Request rematch
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            tic_tac::request_rematch(&mut game, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        
+        clock::destroy_for_testing(clock);
+        test_scenario::end(scenario);
+    }
+    
+    #[test]
+    fun test_accept_rematch_competitive() {
+        let mut scenario = test_scenario::begin(PLAYER_X);
+        let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+        
+        // Initialize
+        {
+            tic_tac::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Setup and complete a competitive game
+        setup_and_complete_competitive_game(&mut scenario);
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Request rematch
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            tic_tac::request_rematch(&mut game, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_O);
+        
+        // Accept rematch
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            let (_game_link, _viewer_link) = tic_tac::accept_rematch(
+                &mut game,
+                stake,
+                &clock,
+                test_scenario::ctx(&mut scenario)
+            );
+            test_scenario::return_shared(game);
+        };
+        
+        clock::destroy_for_testing(clock);
+        test_scenario::end(scenario);
+    }
+    
+    #[test]
+    #[expected_failure(abort_code = 13)] // EGameNotCompleted
+    fun test_rematch_request_game_not_completed() {
+        let mut scenario = test_scenario::begin(PLAYER_X);
+        let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+        
+        // Initialize
+        {
+            tic_tac::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Create game but don't complete it
+        {
+            let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
+            let (_game_link, _viewer_link) = tic_tac::create_competitive_game(
+                stake,
+                &clock,
+                test_scenario::ctx(&mut scenario)
+            );
+        };
+        test_scenario::next_tx(&mut scenario, PLAYER_X);
+        
+        // Try to request rematch on active game
+        {
+            let mut game = test_scenario::take_shared<Game>(&scenario);
+            tic_tac::request_rematch(&mut game, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(game);
+        };
+        
+        clock::destroy_for_testing(clock);
+        test_scenario::end(scenario);
+    }
+
+    #[test]
     fun test_cancel_expired_game() {
         let mut scenario = test_scenario::begin(PLAYER_X);
         
@@ -486,7 +650,9 @@ module tic_tac::tic_tac_tests {
         // Create competitive game
         {
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(&mut scenario));
-            tic_tac::create_competitive_game(stake, test_scenario::ctx(&mut scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(&mut scenario));
+            tic_tac::create_competitive_game(stake, &clock, test_scenario::ctx(&mut scenario));
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(&mut scenario, PLAYER_X);
         
@@ -549,15 +715,19 @@ module tic_tac::tic_tac_tests {
         
         // Create friendly game
         {
-            tic_tac::create_friendly_game(test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::create_friendly_game(&clock, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(scenario, PLAYER_O);
         
         // Join game
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
-            tic_tac::join_friendly_game(&mut game, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::join_friendly_game(&mut game, &clock, test_scenario::ctx(scenario));
             test_scenario::return_shared(game);
+            clock::destroy_for_testing(clock);
         };
     }
 
@@ -567,7 +737,9 @@ module tic_tac::tic_tac_tests {
         // Create competitive game
         {
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(scenario));
-            tic_tac::create_competitive_game(stake, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::create_competitive_game(stake, &clock, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(scenario, PLAYER_O);
         
@@ -575,8 +747,10 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let stake = coin::mint_for_testing<SUI>(STAKE_AMOUNT, test_scenario::ctx(scenario));
-            tic_tac::join_competitive_game(&mut game, stake, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::join_competitive_game(&mut game, stake, &clock, test_scenario::ctx(scenario));
             test_scenario::return_shared(game);
+            clock::destroy_for_testing(clock);
         };
         test_scenario::next_tx(scenario, PLAYER_X);
         
@@ -594,7 +768,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 0, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -604,7 +780,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 1, 0, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 0, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -614,7 +792,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 1, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 1, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -624,7 +804,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 1, 1, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 1, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -634,7 +816,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 2, test_scenario::ctx(scenario));
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 2, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock);
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -651,7 +835,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 0, test_scenario::ctx(scenario)); // X
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 0, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // X
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -660,7 +846,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 1, test_scenario::ctx(scenario)); // O
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 1, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // O
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -669,7 +857,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 0, 2, test_scenario::ctx(scenario)); // X
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 0, 2, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // X
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -678,7 +868,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 1, 2, test_scenario::ctx(scenario)); // O
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 2, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // O
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -687,7 +879,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 1, 0, test_scenario::ctx(scenario)); // X
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 0, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // X
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -696,7 +890,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 2, 0, test_scenario::ctx(scenario)); // O
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 2, 0, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // O
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -705,7 +901,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 1, 1, test_scenario::ctx(scenario)); // X
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 1, 1, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // X
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -714,7 +912,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 2, 2, test_scenario::ctx(scenario)); // O
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 2, 2, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // O
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
@@ -723,7 +923,9 @@ module tic_tac::tic_tac_tests {
         {
             let mut game = test_scenario::take_shared<Game>(scenario);
             let mut treasury = test_scenario::take_shared<Treasury>(scenario);
-            tic_tac::place_mark(&mut game, &mut treasury, 2, 1, test_scenario::ctx(scenario)); // X - Draw!
+            let clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            tic_tac::place_mark(&mut game, &mut treasury, &clock, 2, 1, test_scenario::ctx(scenario));
+            clock::destroy_for_testing(clock); // X - Draw!
             test_scenario::return_shared(game);
             test_scenario::return_shared(treasury);
         };
