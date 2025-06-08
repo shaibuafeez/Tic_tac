@@ -843,12 +843,14 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           onSuccess: (result) => {
             console.log("Rematch accepted:", result);
             
-            // Extract new game IDs from transaction result
+            // Extract new game ID from RematchCreated event
             const resultWithChanges = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
             if (resultWithChanges.events) {
+              console.log("Events from rematch acceptance:", resultWithChanges.events);
+              
               const rematchEvent = resultWithChanges.events.find(
                 (event: { type?: string; parsedJson?: unknown }) => 
-                  event.type && event.type.includes("RematchStarted")
+                  event.type && event.type.includes("RematchCreated")
               );
               
               if (rematchEvent && rematchEvent.parsedJson) {
@@ -857,16 +859,57 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
                   old_game_id?: string;
                 };
                 
+                console.log("RematchCreated event data:", eventData);
+                
                 if (eventData.new_game_id) {
                   alert("Rematch accepted! Starting new game...");
+                  console.log("Navigating to new game:", eventData.new_game_id);
                   // Navigate to the new game
                   router.push(`/game/${eventData.new_game_id}`);
                   return;
                 }
               }
+              
+              // Fallback: Check for GameCreated event
+              const gameCreatedEvent = resultWithChanges.events.find(
+                (event: { type?: string; parsedJson?: unknown }) => 
+                  event.type && event.type.includes("GameCreated")
+              );
+              
+              if (gameCreatedEvent && gameCreatedEvent.parsedJson) {
+                const eventData = gameCreatedEvent.parsedJson as { game_id?: string };
+                if (eventData.game_id) {
+                  alert("Rematch accepted! Starting new game...");
+                  console.log("Navigating to new game from GameCreated event:", eventData.game_id);
+                  router.push(`/game/${eventData.game_id}`);
+                  return;
+                }
+              }
             }
             
-            // Fallback: reload current game
+            // Fallback: Check objectChanges for new Game object
+            const resultWithObjectChanges = result as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+            if (resultWithObjectChanges.objectChanges) {
+              console.log("Checking object changes for new game");
+              
+              const createdObjects = resultWithObjectChanges.objectChanges.filter(
+                (change: any) => change.type === "created" // eslint-disable-line @typescript-eslint/no-explicit-any
+              );
+              
+              const newGameObject = createdObjects.find((obj: { objectType?: string; objectId?: string }) => {
+                return obj.objectType && obj.objectType.includes("tic_tac::Game");
+              });
+              
+              if (newGameObject && newGameObject.objectId) {
+                alert("Rematch accepted! Starting new game...");
+                console.log("Navigating to new game from object changes:", newGameObject.objectId);
+                router.push(`/game/${newGameObject.objectId}`);
+                return;
+              }
+            }
+            
+            // Final fallback: reload current game
+            console.log("No new game found, reloading current game");
             alert("Rematch accepted! Game updated.");
             loadGame(gameState.id);
           },
