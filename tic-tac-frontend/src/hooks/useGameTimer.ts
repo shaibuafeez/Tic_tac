@@ -37,7 +37,7 @@ export function useGameTimer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameStatus]);
+  }, [gameStatus, lastMoveEpoch]);
 
   // Convert to blockchain epoch (seconds)
   const currentBlockchainTime = Math.floor(currentTime / 1000);

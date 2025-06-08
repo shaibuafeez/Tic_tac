@@ -76,6 +76,8 @@ export async function getUserGames(
         creator?: string;
         winner?: string;
         last_move_ms?: number;
+        rematch_requested_by?: string;
+        rematch_accepted?: boolean;
       };
       const gameId = obj.objectId;
       
@@ -104,6 +106,8 @@ export async function getUserGames(
         lastMoveEpoch: Number(fields.last_move_ms) || 0,
         gameLink: `${window.location.origin}/game/${gameId}`,
         viewerLink: `${window.location.origin}/view/${gameId}`,
+        rematchRequestedBy: fields.rematch_requested_by ? String(fields.rematch_requested_by) : undefined,
+        rematchAccepted: fields.rematch_accepted ? Boolean(fields.rematch_accepted) : false,
       });
     }
     

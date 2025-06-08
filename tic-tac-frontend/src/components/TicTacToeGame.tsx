@@ -38,6 +38,8 @@ export interface GameState {
   lastMoveEpoch?: number;
   gameLink?: string;
   viewerLink?: string;
+  rematchRequestedBy?: string;
+  rematchAccepted?: boolean;
 }
 
 interface TicTacToeGameProps {
@@ -176,6 +178,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         lastMoveEpoch: Number(fields.last_move_ms) || 0,
         gameLink: `${window.location.origin}/game/${id}`,
         viewerLink: `${window.location.origin}/view/${id}`,
+        rematchRequestedBy: fields.rematch_requested_by ? String(fields.rematch_requested_by) : undefined,
+        rematchAccepted: fields.rematch_accepted ? Boolean(fields.rematch_accepted) : false,
       };
 
       console.log("Parsed game state:", gameState);
@@ -694,6 +698,116 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     }
   };
 
+  const requestRematch = async () => {
+    if (!account || !gameState) return;
+
+    setIsLoading(true);
+    try {
+      const transaction = new Transaction();
+
+      transaction.moveCall({
+        target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::request_rematch`,
+        arguments: [transaction.object(gameState.id)],
+      });
+
+      signAndExecute(
+        { transaction },
+        {
+          onSuccess: (result) => {
+            console.log("Rematch requested:", result);
+            alert("Rematch request sent! Waiting for opponent's response.");
+            // Update game state locally
+            setGameState({
+              ...gameState,
+              rematchRequestedBy: account.address,
+            });
+          },
+          onError: (error) => {
+            console.error("Failed to request rematch:", error);
+            alert("Failed to request rematch. Please try again.");
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error requesting rematch:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const acceptRematch = async () => {
+    if (!account || !gameState) return;
+
+    setIsLoading(true);
+    try {
+      const transaction = new Transaction();
+
+      // For competitive games, need to stake again
+      if (gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0) {
+        const [coin] = transaction.splitCoins(transaction.gas, [
+          transaction.pure.u64(gameState.stakeAmount),
+        ]);
+
+        transaction.moveCall({
+          target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::accept_rematch`,
+          arguments: [transaction.object(gameState.id), coin, transaction.object('0x6')],
+        });
+      } else {
+        // For friendly games, no stake needed
+        const [fakeCoin] = transaction.splitCoins(transaction.gas, [transaction.pure.u64(1)]);
+        
+        transaction.moveCall({
+          target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::accept_rematch`,
+          arguments: [transaction.object(gameState.id), fakeCoin, transaction.object('0x6')],
+        });
+      }
+
+      signAndExecute(
+        { transaction },
+        {
+          onSuccess: (result) => {
+            console.log("Rematch accepted:", result);
+            
+            // Extract new game IDs from transaction result
+            const resultWithChanges = result as { events?: Array<{ type?: string; parsedJson?: unknown }> };
+            if (resultWithChanges.events) {
+              const rematchEvent = resultWithChanges.events.find(
+                (event: { type?: string; parsedJson?: unknown }) => 
+                  event.type && event.type.includes("RematchStarted")
+              );
+              
+              if (rematchEvent && rematchEvent.parsedJson) {
+                const eventData = rematchEvent.parsedJson as { 
+                  new_game_id?: string;
+                  old_game_id?: string;
+                };
+                
+                if (eventData.new_game_id) {
+                  alert("Rematch accepted! Starting new game...");
+                  // Navigate to the new game
+                  router.push(`/game/${eventData.new_game_id}`);
+                  return;
+                }
+              }
+            }
+            
+            // Fallback: reload current game
+            alert("Rematch accepted! Game updated.");
+            loadGame(gameState.id);
+          },
+          onError: (error) => {
+            console.error("Failed to accept rematch:", error);
+            alert("Failed to accept rematch. Please try again.");
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error accepting rematch:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const selectGame = (game: GameState) => {
     setGameState(game);
     setShowGameList(false);
@@ -835,6 +949,8 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         onHome={resetGame}
         onCancelGame={cancelGame}
         onClaimTimeoutVictory={claimTimeoutVictory}
+        onRequestRematch={requestRematch}
+        onAcceptRematch={acceptRematch}
         isLoading={isLoading}
         currentPlayer={account.address}
       />

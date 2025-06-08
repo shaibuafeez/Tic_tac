@@ -11,6 +11,7 @@ import {
   XCircle,
   Clock,
 } from "lucide-react";
+import { GAME_MODE } from "@/config/constants";
 import { GameState } from "./TicTacToeGame";
 import { GAME_CONSTANTS, UI_CONFIG, GAME_STATUS } from "@/config/constants";
 import { useGameSync } from "@/hooks/useGameSync";
@@ -25,6 +26,8 @@ interface GameBoardProps {
   onHome?: () => void;
   onCancelGame?: () => void;
   onClaimTimeoutVictory?: () => void;
+  onRequestRematch?: () => void;
+  onAcceptRematch?: () => void;
   isLoading: boolean;
   currentPlayer: string;
 }
@@ -36,6 +39,8 @@ export function GameBoard({
   onHome,
   onCancelGame,
   onClaimTimeoutVictory,
+  onRequestRematch,
+  onAcceptRematch,
   isLoading,
   currentPlayer,
 }: GameBoardProps) {
@@ -521,6 +526,60 @@ export function GameBoard({
             </span>
           )}
         </div>
+
+        {/* Rematch Section - Show after game completion */}
+        {gameOver && !gameState.id.startsWith("game-") && (
+          <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+            {gameState.rematchRequestedBy ? (
+              gameState.rematchRequestedBy === currentPlayer ? (
+                <div className="text-center">
+                  <p className="text-blue-800 font-medium mb-2">
+                    🔄 Rematch requested!
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Waiting for opponent to accept...
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center space-y-3">
+                  <p className="text-blue-800 font-medium">
+                    🔄 {truncateAddress(gameState.rematchRequestedBy)} wants a rematch!
+                  </p>
+                  {gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0 && (
+                    <p className="text-sm text-blue-600">
+                      Stake: {(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI
+                    </p>
+                  )}
+                  <button
+                    onClick={onAcceptRematch}
+                    disabled={isLoading}
+                    className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ✓ Accept Rematch
+                  </button>
+                </div>
+              )
+            ) : (
+              <div className="text-center">
+                <p className="text-blue-800 font-medium mb-3">
+                  Great game! Want a rematch?
+                </p>
+                {gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0 && (
+                  <p className="text-sm text-blue-600 mb-3">
+                    Same stake: {(gameState.stakeAmount / 1_000_000_000).toFixed(2)} SUI
+                  </p>
+                )}
+                <button
+                  onClick={onRequestRematch}
+                  disabled={isLoading}
+                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  🔄 Request Rematch
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Cancel Button for Waiting Games */}
