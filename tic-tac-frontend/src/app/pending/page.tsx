@@ -155,6 +155,14 @@ export default function PendingMovesPage() {
               <div className="text-xl md:text-2xl font-bold text-black">{pendingGames.length}</div>
               <div className="text-sm text-gray-600">{t("activeGames")}</div>
             </div>
+            {/* Mobile Home Button */}
+            <Link
+              href="/"
+              className="md:hidden p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
+              title="Go home"
+            >
+              <Home className="w-5 h-5" />
+            </Link>
             {/* Mobile Menu */}
             <div className="md:hidden">
               <MobileMenu />
