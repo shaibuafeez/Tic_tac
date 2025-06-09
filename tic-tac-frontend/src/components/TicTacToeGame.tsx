@@ -10,7 +10,6 @@ import { Transaction } from "@mysten/sui/transactions";
 import { GameBoard } from "./GameBoard";
 import { GameModeSelection } from "./GameModeSelection";
 import { JoinGame } from "./JoinGame";
-import { GameList } from "./GameList";
 import { ShareGame } from "./ShareGame";
 import { WalletButton } from "./WalletButton";
 import { MyGames } from "./MyGames";
@@ -48,7 +47,6 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
   const { t } = useLanguage();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showGameList, setShowGameList] = useState(false);
   const [showMyGames, setShowMyGames] = useState(false);
   const [showJoinGame, setShowJoinGame] = useState(false);
   const [showShareGame, setShowShareGame] = useState(false);
@@ -541,7 +539,6 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
   const resetGame = () => {
     setGameState(null);
-    setShowGameList(false);
     setShowMyGames(false);
     setShowJoinGame(false);
   };
@@ -717,7 +714,6 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
   const selectGame = (game: GameState) => {
     setGameState(game);
-    setShowGameList(false);
 
     // If it's a game waiting for players, show join screen
     if (game.status === GAME_STATUS.WAITING) {
@@ -808,20 +804,6 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
       );
     }
 
-    if (showGameList) {
-      return (
-        <div className="space-y-4">
-          <GameList onSelectGame={selectGame} currentPlayer={account.address} />
-          <button
-            onClick={() => setShowGameList(false)}
-            className="w-full max-w-md mx-auto block text-center py-3 sm:py-2 text-sm sm:text-base text-black hover:text-white hover:bg-black transition-colors mx-4 sm:mx-auto rounded-lg"
-          >
-            ← {t("backToCreateGame")}
-          </button>
-        </div>
-      );
-    }
-
     return (
       <div className="space-y-4">
         <GameModeSelection
@@ -829,18 +811,12 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           isLoading={isLoading}
           currentPlayer={account.address}
         />
-        <div id="my-games" className="max-w-md mx-auto space-y-2 px-4 sm:px-0">
+        <div id="my-games" className="max-w-md mx-auto px-4 sm:px-0">
           <button
             onClick={() => setShowMyGames(true)}
             className="w-full py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg text-sm sm:text-base"
           >
             📋 {t("myGames")}
-          </button>
-          <button
-            onClick={() => setShowGameList(true)}
-            className="w-full py-3 sm:py-2 text-sm sm:text-base text-black hover:text-white hover:bg-black transition-colors rounded-lg"
-          >
-            {t("orBrowseGames")} →
           </button>
         </div>
       </div>
