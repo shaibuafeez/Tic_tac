@@ -543,6 +543,10 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     setShowJoinGame(false);
   };
 
+  const goHome = () => {
+    router.push('/');
+  };
+
   const cancelGame = async () => {
     if (!account || !gameState) return;
 
@@ -829,7 +833,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         gameState={gameState}
         onMakeMove={makeMove}
         onResetGame={resetGame}
-        onHome={resetGame}
+        onHome={goHome}
         onCancelGame={cancelGame}
         onClaimTimeoutVictory={claimTimeoutVictory}
         isLoading={isLoading}
