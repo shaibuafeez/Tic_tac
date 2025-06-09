@@ -7,7 +7,11 @@ import { useSuiClient, useCurrentAccount } from "@mysten/dapp-kit";
 import { GAME_STATUS } from "@/config/constants";
 import { useRouter } from "next/navigation";
 
-export function NotificationBadge() {
+interface NotificationBadgeProps {
+  showBadgeOnly?: boolean;
+}
+
+export function NotificationBadge({ showBadgeOnly = false }: NotificationBadgeProps) {
   const [pendingMoves, setPendingMoves] = useState(0);
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
@@ -53,6 +57,14 @@ export function NotificationBadge() {
     return null;
   }
 
+  if (showBadgeOnly) {
+    return (
+      <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+        {pendingMoves}
+      </span>
+    );
+  }
+
   return (
     <button
       onClick={handleClick}
@@ -61,7 +73,7 @@ export function NotificationBadge() {
         pendingMoves > 1 ? "s" : ""
       } waiting for your move`}
     >
-      <Bell className="w-6 h-6 text-black" />
+      <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
       <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
         {pendingMoves}
       </span>

@@ -98,27 +98,27 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-white border-2 border-black rounded-lg p-8 max-w-2xl w-full animate-fade-in">
+      <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6 md:p-8 max-w-2xl w-full animate-fade-in mx-4 sm:mx-auto">
         <div className="flex items-center justify-center gap-2">
-          <Loader2 className="w-6 h-6 animate-spinner" />
-          <span>Loading your games...</span>
+          <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spinner" />
+          <span className="text-sm sm:text-base">Loading your games...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border-2 border-black rounded-lg p-8 max-w-2xl w-full animate-fade-in">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-black mb-2">My Games</h2>
-        <p className="text-black">Continue playing or view your game history</p>
+    <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6 md:p-8 max-w-2xl w-full animate-fade-in mx-4 sm:mx-auto">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-black mb-1 sm:mb-2">My Games</h2>
+        <p className="text-sm sm:text-base text-black">Continue playing or view your game history</p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto">
         <button
           onClick={() => setFilter("all")}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base whitespace-nowrap ${
             filter === "all"
               ? "bg-black text-white"
               : "bg-white text-black hover:bg-black hover:text-white"
@@ -128,7 +128,7 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
         </button>
         <button
           onClick={() => setFilter("active")}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base whitespace-nowrap ${
             filter === "active"
               ? "bg-black text-white"
               : "bg-white text-black hover:bg-black hover:text-white"
@@ -146,7 +146,7 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
         </button>
         <button
           onClick={() => setFilter("completed")}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base whitespace-nowrap ${
             filter === "completed"
               ? "bg-black text-white"
               : "bg-white text-black hover:bg-black hover:text-white"

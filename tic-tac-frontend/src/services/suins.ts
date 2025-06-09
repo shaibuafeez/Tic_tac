@@ -63,9 +63,9 @@ export class SuiNSService {
       }
 
       return null;
-    } catch (error: any) {
+    } catch (error) {
       // If package doesn't exist, disable SuiNS
-      if (error?.message?.includes('Package object does not exist')) {
+      if (error instanceof Error && error.message?.includes('Package object does not exist')) {
         console.warn('SuiNS not available on this network, disabling SuiNS features');
         suinsDisabled = true;
       }
@@ -121,9 +121,9 @@ export class SuiNSService {
       }
 
       return null;
-    } catch (error: any) {
+    } catch (error) {
       // If package doesn't exist, disable SuiNS
-      if (error?.message?.includes('Package object does not exist')) {
+      if (error instanceof Error && error.message?.includes('Package object does not exist')) {
         console.warn('SuiNS not available on this network, disabling SuiNS features');
         suinsDisabled = true;
       }

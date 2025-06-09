@@ -102,11 +102,11 @@ export function GameModeSelection({
             <button
               onClick={handleConfirmCompetitive}
               disabled={isLoading || parseFloat(stakeAmount) < 0.1 || Boolean(invitedPlayer.trim() && resolvedInviteAddress === currentPlayer) || Boolean(invitedPlayer.trim() && invitedPlayer.includes('.') && !resolvedInviteAddress)}
-              className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed modern-button active:scale-95"
+              className="w-full bg-gray-900 text-white py-2.5 sm:py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed modern-button active:scale-95 text-sm sm:text-base"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                   {t("creatingGame")}
                 </span>
               ) : (
@@ -118,7 +118,7 @@ export function GameModeSelection({
                 setShowStakeInput(false);
                 setSelectedMode(null);
               }}
-              className="w-full py-3 border-2 border-black rounded-lg hover:border-black transition-colors"
+              className="w-full py-3 border-2 border-black rounded-lg text-black hover:border-black hover:bg-black hover:text-white transition-colors"
             >
               {t("back")}
             </button>

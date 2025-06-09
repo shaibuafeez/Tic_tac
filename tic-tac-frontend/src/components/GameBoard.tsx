@@ -461,9 +461,9 @@ export function GameBoard({
             <button
               onClick={onClaimTimeoutVictory}
               disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed animate-pulse"
+              className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium flex items-center justify-center gap-1 sm:gap-2 disabled:opacity-50 disabled:cursor-not-allowed animate-pulse text-sm sm:text-base"
             >
-              <Trophy className="w-5 h-5" />
+              <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
               {t("claimTimeoutVictory")}
             </button>
             <p className="text-xs text-black mt-2 text-center">

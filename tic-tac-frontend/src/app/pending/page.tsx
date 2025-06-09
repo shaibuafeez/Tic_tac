@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useLanguage } from "@/hooks/useLanguage";
 import { GameState } from "@/components/TicTacToeGame";
 import { AddressDisplay } from "@/components/AddressDisplay";
+import { MobileMenu } from "@/components/MobileMenu";
 
 interface PendingGame {
   game: GameState;
@@ -122,12 +123,13 @@ export default function PendingMovesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-4 md:py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-2">
               <button
                 onClick={goBack}
                 className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
@@ -144,13 +146,19 @@ export default function PendingMovesPage() {
               </Link>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-black">{t("pendingMoves")}</h1>
-              <p className="text-gray-600">{t("gamesRequiringAttention")}</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-black">{t("pendingMoves")}</h1>
+              <p className="text-sm md:text-base text-gray-600">{t("gamesRequiringAttention")}</p>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-black">{pendingGames.length}</div>
-            <div className="text-sm text-gray-600">{t("activeGames")}</div>
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="text-xl md:text-2xl font-bold text-black">{pendingGames.length}</div>
+              <div className="text-sm text-gray-600">{t("activeGames")}</div>
+            </div>
+            {/* Mobile Menu */}
+            <div className="md:hidden">
+              <MobileMenu />
+            </div>
           </div>
         </div>
 

@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { CONTRACT_CONFIG } from "@/config/constants";
 import { useLanguage } from "@/hooks/useLanguage";
+import { MobileMenu } from "@/components/MobileMenu";
 
 interface TreasuryData {
   balance: number;
@@ -418,22 +419,27 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
+    <main className="min-h-screen p-4 md:p-8 bg-gray-50">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white border-2 border-black rounded-lg p-6">
+        <div className="bg-white border-2 border-black rounded-lg p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-black flex items-center gap-3">
-              <Shield className="w-8 h-8" />
+            <h1 className="text-2xl md:text-3xl font-bold text-black flex items-center gap-3">
+              <Shield className="w-6 md:w-8 h-6 md:h-8" />
               {t("adminPanel")}
             </h1>
+            {/* Desktop Home Link */}
             <Link
               href="/"
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all"
+              className="hidden md:flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all"
             >
               <Home className="w-4 h-4" />
               {t("home")}
             </Link>
+            {/* Mobile Menu */}
+            <div className="md:hidden">
+              <MobileMenu />
+            </div>
           </div>
           <p className="text-gray-600">{t("manageTreasuryAndPlatform")}</p>
         </div>

@@ -172,11 +172,11 @@ export function JoinGame({
           <button
             onClick={onJoin}
             disabled={isLoading || (isCompetitive && !hasSufficientBalance)}
-            className="w-full bg-black text-white py-3 rounded-lg hover:bg-black transition-all duration-200 disabled:bg-white disabled:text-black disabled:cursor-not-allowed modern-button active:scale-95"
+            className="w-full bg-black text-white py-2.5 sm:py-3 rounded-lg hover:bg-black transition-all duration-200 disabled:bg-white disabled:text-black disabled:cursor-not-allowed modern-button active:scale-95 text-sm sm:text-base"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spinner" />
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spinner" />
                 {t("joiningGame")}
               </span>
             ) : (
@@ -230,7 +230,7 @@ export function JoinGame({
 
         <button
           onClick={onCancel}
-          className="w-full py-3 border-2 border-black rounded-lg hover:border-black hover:bg-black hover:text-white transition-all duration-200 hover:shadow-md active:scale-95"
+          className="w-full py-3 border-2 border-black rounded-lg text-black hover:border-black hover:bg-black hover:text-white transition-all duration-200 hover:shadow-md active:scale-95"
         >
           {t("backToMenu")}
         </button>

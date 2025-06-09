@@ -727,25 +727,25 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
 
   if (!account) {
     return (
-      <div className="bg-white border-2 border-black rounded-lg p-8 text-center max-w-md mx-auto animate-fade-in">
-        <div className="mb-6">
-          <div className="w-20 h-20 mx-auto mb-4 bg-black rounded-lg flex items-center justify-center animate-pulse">
-            <div className="text-white text-3xl font-bold">X</div>
+      <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6 md:p-8 text-center max-w-md mx-auto animate-fade-in mx-4 sm:mx-auto">
+        <div className="mb-4 sm:mb-6">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-black rounded-lg flex items-center justify-center animate-pulse">
+            <div className="text-white text-2xl sm:text-3xl font-bold">X</div>
           </div>
-          <h2 className="text-2xl font-bold text-black mb-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-black mb-2">
             {gameId ? t("joinGame") : t("gameTitle")}
           </h2>
-          <p className="text-black">
+          <p className="text-sm sm:text-base text-black px-2">
             {gameId ? t("connectWalletToJoin") : t("gameDescription")}
           </p>
         </div>
 
         {gameId && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg animate-fade-in">
-            <p className="text-sm text-blue-800 mb-2 font-semibold">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg animate-fade-in">
+            <p className="text-xs sm:text-sm text-blue-800 mb-1 sm:mb-2 font-semibold">
               🎮 {t("invitedToGame")}
             </p>
-            <p className="text-xs text-blue-600 font-mono">
+            <p className="text-xs text-blue-600 font-mono break-all">
               {gameId.slice(0, 8)}...{gameId.slice(-8)}
             </p>
           </div>
@@ -755,12 +755,12 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           <WalletButton />
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-black">
-          <span>{t("builtOnSui")}</span>
-          <span>•</span>
-          <span>{t("winNftTrophies")}</span>
-          <span>•</span>
-          <span>{t("stakeAndEarn")}</span>
+        <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs text-black px-2">
+          <span className="whitespace-nowrap">{t("builtOnSui")}</span>
+          <span className="hidden sm:inline">•</span>
+          <span className="whitespace-nowrap">{t("winNftTrophies")}</span>
+          <span className="hidden sm:inline">•</span>
+          <span className="whitespace-nowrap">{t("stakeAndEarn")}</span>
         </div>
       </div>
     );
@@ -814,7 +814,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           <GameList onSelectGame={selectGame} currentPlayer={account.address} />
           <button
             onClick={() => setShowGameList(false)}
-            className="w-full max-w-md mx-auto block text-center py-2 text-black hover:text-white hover:bg-black transition-colors"
+            className="w-full max-w-md mx-auto block text-center py-3 sm:py-2 text-sm sm:text-base text-black hover:text-white hover:bg-black transition-colors mx-4 sm:mx-auto rounded-lg"
           >
             ← {t("backToCreateGame")}
           </button>
@@ -829,16 +829,16 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           isLoading={isLoading}
           currentPlayer={account.address}
         />
-        <div className="max-w-md mx-auto space-y-2">
+        <div id="my-games" className="max-w-md mx-auto space-y-2 px-4 sm:px-0">
           <button
             onClick={() => setShowMyGames(true)}
-            className="w-full py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+            className="w-full py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg text-sm sm:text-base"
           >
             📋 {t("myGames")}
           </button>
           <button
             onClick={() => setShowGameList(true)}
-            className="w-full py-2 text-black hover:text-white hover:bg-black transition-colors"
+            className="w-full py-3 sm:py-2 text-sm sm:text-base text-black hover:text-white hover:bg-black transition-colors rounded-lg"
           >
             {t("orBrowseGames")} →
           </button>

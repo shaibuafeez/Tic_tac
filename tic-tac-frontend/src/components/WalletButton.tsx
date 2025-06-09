@@ -12,15 +12,23 @@ export function WalletButton() {
           color: #ffffff !important;
           border: 2px solid #000000 !important;
           border-radius: 12px !important;
-          padding: 16px 32px !important;
+          padding: 12px 20px !important;
           font-weight: 600 !important;
-          font-size: 18px !important;
+          font-size: 14px !important;
           transition: all 0.2s ease !important;
           opacity: 1 !important;
           position: relative !important;
           z-index: 10 !important;
-          min-width: 200px !important;
+          min-width: 160px !important;
           cursor: pointer !important;
+        }
+        
+        @media (min-width: 640px) {
+          :global(.wallet-connect-wrapper button) {
+            padding: 16px 32px !important;
+            font-size: 18px !important;
+            min-width: 200px !important;
+          }
         }
         
         :global(.wallet-connect-wrapper button *) {
@@ -76,9 +84,9 @@ export function WalletButton() {
       <div className="wallet-connect-wrapper">
         <ConnectButton 
           connectText={
-            <div className="flex items-center gap-3" style={{ color: '#ffffff' }}>
-              <Wallet className="w-6 h-6" style={{ color: '#ffffff' }} />
-              <span className="text-lg" style={{ color: '#ffffff' }}>Connect Wallet</span>
+            <div className="flex items-center gap-2 sm:gap-3" style={{ color: '#ffffff' }}>
+              <Wallet className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: '#ffffff' }} />
+              <span className="text-sm sm:text-lg" style={{ color: '#ffffff' }}>Connect Wallet</span>
             </div>
           }
         />

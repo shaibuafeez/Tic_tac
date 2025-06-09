@@ -23,6 +23,27 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow-x: hidden;
+}
+
+/* Allow text selection for specific elements */
+.selectable {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Prevent overscroll bounce on iOS */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* Ensure proper touch handling */
+* {
+  touch-action: manipulation;
 }
 
 /* Game Cell Animations */
@@ -166,14 +187,25 @@ body {
   transition: all 0.2s ease;
 }
 
-.game-cell:hover:not(.occupied) {
-  background-color: rgba(0, 0, 0, 0.05);
-  transform: scale(1.05);
-  cursor: pointer;
+/* Disable hover effects on touch devices */
+@media (hover: hover) {
+  .game-cell:hover:not(.occupied) {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.05);
+    cursor: pointer;
+  }
 }
 
 .game-cell.occupied {
   cursor: not-allowed;
+}
+
+/* Mobile-specific touch feedback */
+@media (hover: none) {
+  .game-cell:active:not(.occupied) {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(0.98);
+  }
 }
 
 /* Modern Button Styles */

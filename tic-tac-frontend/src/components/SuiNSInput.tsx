@@ -124,7 +124,7 @@ export function SuiNSInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full px-4 py-3 pr-10 border-2 rounded-lg focus:outline-none transition-colors font-mono text-sm ${getInputBorderClass()} ${className}`}
+        className={`w-full px-4 py-3 pr-10 border-2 rounded-lg focus:outline-none transition-colors font-mono text-sm text-black placeholder-gray-400 ${getInputBorderClass()} ${className}`}
       />
       
       {/* Status indicator */}

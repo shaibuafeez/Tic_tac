@@ -247,29 +247,40 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
+    <main className="min-h-screen p-4 md:p-8 bg-gray-50">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white border-2 border-black rounded-lg p-6">
+        <div className="bg-white border-2 border-black rounded-lg p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-black flex items-center gap-3">
-              <Trophy className="w-8 h-8 text-yellow-500" />
-              {t("leaderboard")}
-            </h1>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Mobile Home Button */}
+              <Link
+                href="/"
+                className="md:hidden p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-all border border-gray-300"
+                title="Go home"
+              >
+                <Home className="w-5 h-5" />
+              </Link>
+              <h1 className="text-2xl md:text-3xl font-bold text-black flex items-center gap-3">
+                <Trophy className="w-6 md:w-8 h-6 md:h-8 text-yellow-500" />
+                <span className="hidden sm:inline">{t("leaderboard")}</span>
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => fetchLeaderboard(true)}
                 disabled={isRefreshing}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-3 md:px-4 py-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all disabled:opacity-50"
               >
                 <RefreshCw
                   className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
                 />
-                {isRefreshing ? t("loading") : "Refresh"}
+                <span className="hidden md:inline">{isRefreshing ? t("loading") : "Refresh"}</span>
               </button>
+              {/* Desktop Home Link */}
               <Link
                 href="/"
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all"
+                className="hidden md:flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-black border border-gray-300 rounded-lg hover:border-black transition-all"
               >
                 <Home className="w-4 h-4" />
                 {t("home")}

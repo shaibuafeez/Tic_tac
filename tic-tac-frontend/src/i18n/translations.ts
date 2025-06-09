@@ -16,6 +16,7 @@ export const translations = {
     myGames: 'My Games',
     leaderboard: 'Leaderboard',
     admin: 'Admin',
+    notifications: 'Notifications',
     
     // Game modes
     friendlyGame: 'Friendly Game',
@@ -182,6 +183,7 @@ export const translations = {
     myGames: 'Mis Juegos',
     leaderboard: 'Clasificación',
     admin: 'Admin',
+    notifications: 'Notificaciones',
     
     // Game modes
     friendlyGame: 'Juego Amistoso',
@@ -348,6 +350,7 @@ export const translations = {
     myGames: '我的游戏',
     leaderboard: '排行榜',
     admin: '管理员',
+    notifications: '通知',
     
     // Game modes
     friendlyGame: '友谊赛',

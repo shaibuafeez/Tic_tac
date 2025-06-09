@@ -48,7 +48,7 @@ export function AddressDisplay({
   return (
     <span className="relative inline-flex items-center">
       <span 
-        className={`font-mono text-sm ${copyable ? 'cursor-pointer hover:text-blue-600 dark:hover:text-blue-400' : ''} ${className}`}
+        className={`font-mono text-xs sm:text-sm ${copyable ? 'cursor-pointer hover:text-blue-600 dark:hover:text-blue-400' : ''} ${className}`}
         onClick={handleCopy}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
