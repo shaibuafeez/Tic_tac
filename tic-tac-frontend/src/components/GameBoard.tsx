@@ -260,7 +260,7 @@ export function GameBoard({
   };
 
   return (
-    <div className="bg-white border-2 border-black rounded-lg p-8 max-w-lg w-full relative animate-fade-in">
+    <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6 md:p-8 max-w-lg w-full relative animate-fade-in mx-4 sm:mx-auto">
       {/* Confetti Effect */}
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
@@ -284,58 +284,59 @@ export function GameBoard({
         </div>
       )}
       {/* Game Info */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-black flex items-center gap-2">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black flex items-center gap-2">
               {gameState.mode === 1 ? (
-                <Trophy className="w-6 h-6" />
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6" />
               ) : (
-                <Users className="w-6 h-6" />
+                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
               )}
-              {gameState.mode === 1 ? t("competitiveGame") : t("friendlyGame")}
+              <span className="hidden sm:inline">{gameState.mode === 1 ? t("competitiveGame") : t("friendlyGame")}</span>
+              <span className="sm:hidden">{gameState.mode === 1 ? "Competitive" : "Friendly"}</span>
             </h2>
             {shouldSync && (
               <div
-                className={`flex items-center gap-1 text-sm transition-colors ${
+                className={`flex items-center gap-1 text-xs sm:text-sm transition-colors ${
                   isLive ? "text-green-600" : "text-black"
                 }`}
               >
-                <Wifi className={`w-4 h-4 ${isLive ? "animate-pulse" : ""}`} />
-                <span>{isLive ? t("live") : t("connected")}</span>
+                <Wifi className={`w-3 h-3 sm:w-4 sm:h-4 ${isLive ? "animate-pulse" : ""}`} />
+                <span className="hidden sm:inline">{isLive ? t("live") : t("connected")}</span>
               </div>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             {onHome && (
               <button
                 onClick={onHome}
-                className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
+                className="p-1.5 sm:p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
                 title="Home"
               >
-                <Home className="w-5 h-5" />
+                <Home className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             )}
             <button
               onClick={shareGameToTwitter}
-              className="p-2 text-gray-500 hover:text-[#1DA1F2] hover:bg-blue-50 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-[#1DA1F2] hover:bg-blue-50 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
               title="Share on Twitter"
             >
-              <Twitter className="w-5 h-5" />
+              <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={onResetGame}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
+              className="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-300 hover:scale-110 active:scale-95"
               title="New Game"
             >
-              <RotateCcw className="w-5 h-5" />
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4">
           <div
-            className={`p-3 rounded-lg border transition-all duration-300 ${
+            className={`p-2 sm:p-3 rounded-lg border transition-all duration-300 ${
               currentPlayer === x
                 ? "bg-black text-white border-black animate-glow"
                 : "bg-white border-black"
@@ -343,7 +344,7 @@ export function GameBoard({
           >
             <div className="flex items-center justify-between">
               <div
-                className={`text-sm ${
+                className={`text-xs sm:text-sm ${
                   currentPlayer === x ? "text-white" : "text-black"
                 }`}
               >
@@ -358,7 +359,7 @@ export function GameBoard({
               )}
             </div>
             <div
-              className={`font-mono text-sm ${
+              className={`font-mono text-xs sm:text-sm ${
                 currentPlayer === x ? "text-white" : "text-black"
               }`}
             >
@@ -369,7 +370,7 @@ export function GameBoard({
             )}
           </div>
           <div
-            className={`p-3 rounded-lg border transition-all duration-300 ${
+            className={`p-2 sm:p-3 rounded-lg border transition-all duration-300 ${
               currentPlayer === o
                 ? "bg-black text-white border-black animate-glow"
                 : "bg-white border-black"
@@ -377,7 +378,7 @@ export function GameBoard({
           >
             <div className="flex items-center justify-between">
               <div
-                className={`text-sm ${
+                className={`text-xs sm:text-sm ${
                   currentPlayer === o ? "text-white" : "text-black"
                 }`}
               >
@@ -392,7 +393,7 @@ export function GameBoard({
               )}
             </div>
             <div
-              className={`font-mono text-sm ${
+              className={`font-mono text-xs sm:text-sm ${
                 currentPlayer === o ? "text-white" : "text-black"
               }`}
             >
@@ -557,7 +558,7 @@ export function GameBoard({
         )}
 
       {/* Game Board */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
         {board.map((_, index) => {
           const isWinningCell = winningLine?.includes(index);
           const isLastMove = lastMoveIndex === index;
@@ -574,7 +575,7 @@ export function GameBoard({
               }
               className={`
                 aspect-square border-2 border-black rounded-lg flex items-center justify-center
-                text-4xl font-bold transition-all duration-200 relative overflow-hidden
+                text-2xl sm:text-3xl md:text-4xl font-bold transition-all duration-200 relative overflow-hidden
                 ${
                   canPlay
                     ? "game-cell hover:bg-white hover:border-black cursor-pointer hover:scale-105"
