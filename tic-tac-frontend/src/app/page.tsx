@@ -8,6 +8,7 @@ import {
 } from "@mysten/dapp-kit";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { NotificationBadge } from "@/components/NotificationBadge";
+import { InviteBadge } from "@/components/InviteBadge";
 import { GlobalTimer } from "@/components/GlobalTimer";
 import { MobileMenu } from "@/components/MobileMenu";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -66,6 +67,12 @@ export default function Home() {
               >
                 {t("leaderboard")}
               </Link>
+              <Link
+                href="/invites"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all text-black"
+              >
+                Game Invites
+              </Link>
               {hasAdminCap && (
                 <Link
                   href="/admin"
@@ -75,6 +82,7 @@ export default function Home() {
                 </Link>
               )}
               <NotificationBadge />
+              <InviteBadge />
               <GlobalTimer />
             </nav>
             <LanguageSelector />

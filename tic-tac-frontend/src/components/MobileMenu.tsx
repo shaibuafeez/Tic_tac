@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Trophy, Shield, Bell } from 'lucide-react';
+import { Menu, X, Trophy, Shield, Bell, Mail } from 'lucide-react';
 import { ConnectButton, useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import { NotificationBadge } from './NotificationBadge';
+import { InviteBadge } from './InviteBadge';
 import { useLanguage } from '@/hooks/useLanguage';
 import { CONTRACT_CONFIG } from '@/config/constants';
 import Link from 'next/link';
@@ -96,6 +97,16 @@ export function MobileMenu() {
                 <Bell className="w-4 h-4 text-gray-600" />
                 <span className="text-sm text-black">{t("notifications")}</span>
                 <NotificationBadge showBadgeOnly />
+              </Link>
+
+              <Link
+                href="/invites"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Mail className="w-4 h-4 text-gray-600" />
+                <span className="text-sm text-black">Game Invites</span>
+                <InviteBadge showBadgeOnly />
               </Link>
 
               {hasAdminCap && (
