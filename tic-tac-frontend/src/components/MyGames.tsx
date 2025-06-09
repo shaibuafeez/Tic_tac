@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { GAME_STATUS, GAME_MODE } from "@/config/constants";
+import { AddressDisplay } from "./AddressDisplay";
 
 interface MyGamesProps {
   currentPlayer: string;
@@ -94,9 +95,6 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
     return (mist / 1_000_000_000).toFixed(2);
   };
 
-  const truncateAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   if (isLoading) {
     return (
@@ -191,7 +189,7 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
                       ) : (
                         <Users className="w-5 h-5 text-blue-600" />
                       )}
-                      <span className="font-semibold">
+                      <span className="font-semibold text-black">
                         {game.mode === GAME_MODE.COMPETITIVE
                           ? "Competitive"
                           : "Friendly"}{" "}
@@ -202,11 +200,17 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
 
                     <div className="text-sm text-black space-y-1">
                       <div className="flex items-center gap-4">
-                        <span>
+                        <span className="flex items-center gap-1">
                           vs{" "}
-                          {game.x === currentPlayer
-                            ? truncateAddress(game.o || "Waiting...")
-                            : truncateAddress(game.x)}
+                          {game.x === currentPlayer ? (
+                            game.o ? (
+                              <AddressDisplay address={game.o} />
+                            ) : (
+                              "Waiting..."
+                            )
+                          ) : (
+                            <AddressDisplay address={game.x} />
+                          )}
                         </span>
                         {game.mode === GAME_MODE.COMPETITIVE &&
                           game.stakeAmount > 0 && (
@@ -262,7 +266,7 @@ export function MyGames({ currentPlayer, onSelectGame, onBack }: MyGamesProps) {
 
       <button
         onClick={onBack}
-        className="w-full py-3 border-2 border-black rounded-lg hover:border-black hover:bg-black hover:text-white transition-all duration-200"
+        className="w-full py-3 border-2 border-black rounded-lg text-black hover:border-black hover:bg-black hover:text-white transition-all duration-200"
       >
         Back to Main Menu
       </button>

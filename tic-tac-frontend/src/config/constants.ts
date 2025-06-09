@@ -1,9 +1,9 @@
 // Contract deployment information
 export const CONTRACT_CONFIG = {
-  PACKAGE_ID: "0xeb45d85cc35fdd9bce28e7f471dcc769c9c8d62949035de8ca51b5bc520b0757",
-  TREASURY_ID: "0x32877a1117a498f98847e990f8ac7ac5ce156be7ac1627e54fdf6c21380519bf",
-  LEADERBOARD_ID: "0x931cd4e53d26337e05388979d50ae8a0c8bd3d11edb6bf3f34255a0d6134f5db",
-  ADMIN_CAP_ID: "0x4828accd1588721edd526d3b8b261f48e44add3e783dde904101602ffd1185a2",
+  PACKAGE_ID: "0x32427a88755ea973174771427c01f6c98821c0e6f60534b097a5de9928b107bc",
+  TREASURY_ID: "0xd92b80c36f1e949a27d6ead7044b93138c09d9e8ccd966c797de5b4be7933f8a",
+  LEADERBOARD_ID: "0xc91bf80cd81d4b4ddf44fa8450d3cb07f68542f530b0edce75044c213ad354b2",
+  ADMIN_CAP_ID: "0x04f2ff0c2887c17bb675fe26ee2f32097b8498fd23199c4cf7b2ccb18e3bf23b",
   NETWORK: "testnet" as const,
 } as const;
 
@@ -45,4 +45,24 @@ export const UI_CONFIG = {
   MAX_ADDRESS_LENGTH: 10,
   TRUNCATE_START: 6,
   TRUNCATE_END: 4,
+} as const;
+
+// SuiNS configuration
+// NOTE: SuiNS may not be available on all networks. The app will gracefully fall back to addresses.
+export const SUINS_CONFIG = {
+  testnet: {
+    REGISTRY: "0x9a2ed416c6068fafafa5ba02cef68ad10a1a4b8456e0c8a31c2be8ba66dc3b7e",
+    PACKAGE: "0xb9291634325eb0970cf0cf5d24ea44f44f1ab6652b3a5d7be6341c231f3f4e1e",
+    REGISTRY_API: "https://suins-registry-testnet.vercel.app/api"
+  },
+  mainnet: {
+    REGISTRY: "0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871",
+    PACKAGE: "0xd22b24490e0bae52676651b4f56660a5ff8022a2576e0089f79b3c88d44e08f0",
+    REGISTRY_API: "https://suins-registry.vercel.app/api"
+  },
+  devnet: {
+    REGISTRY: "0x9a2ed416c6068fafafa5ba02cef68ad10a1a4b8456e0c8a31c2be8ba66dc3b7e",
+    PACKAGE: "0xb9291634325eb0970cf0cf5d24ea44f44f1ab6652b3a5d7be6341c231f3f4e1e",
+    REGISTRY_API: "https://suins-registry-testnet.vercel.app/api"
+  }
 } as const;

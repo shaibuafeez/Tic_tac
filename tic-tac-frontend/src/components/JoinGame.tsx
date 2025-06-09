@@ -12,6 +12,7 @@ import { GAME_MODE } from "@/config/constants";
 import { BalanceCheck } from "./BalanceCheck";
 import { useBalance } from "@/hooks/useBalance";
 import { useLanguage } from "@/hooks/useLanguage";
+import { AddressDisplay } from "./AddressDisplay";
 
 interface JoinGameProps {
   gameId: string;
@@ -41,9 +42,6 @@ export function JoinGame({
     return (mist / 1_000_000_000).toFixed(2);
   };
 
-  const truncateAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   const isCreator = creator === currentPlayer;
   const isCompetitive = mode === GAME_MODE.COMPETITIVE;
@@ -124,13 +122,13 @@ export function JoinGame({
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-black">{t("gameId")}</span>
             <span className="text-sm font-mono text-black">
-              {truncateAddress(gameId)}
+              <AddressDisplay address={gameId} />
             </span>
           </div>
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-black">{t("creator")}</span>
             <span className="text-sm font-mono text-black">
-              {isCreator ? t("you") : truncateAddress(creator)}
+              {isCreator ? t("you") : <AddressDisplay address={creator} />}
             </span>
           </div>
           {isCompetitive && (

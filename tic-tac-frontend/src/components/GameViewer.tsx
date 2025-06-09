@@ -7,8 +7,8 @@ import {
   GAME_CONSTANTS,
   GAME_MODE,
   GAME_STATUS,
-  UI_CONFIG,
 } from "@/config/constants";
+import { AddressDisplay } from "./AddressDisplay";
 
 interface GameViewerProps {
   gameId: string;
@@ -112,12 +112,6 @@ export function GameViewer({ gameId }: GameViewerProps) {
     return () => clearInterval(interval);
   }, [gameId, autoRefresh, gameData?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const truncateAddress = (address: string) => {
-    if (address.includes("...")) return address;
-    return `${address.slice(0, UI_CONFIG.TRUNCATE_START)}...${address.slice(
-      -UI_CONFIG.TRUNCATE_END
-    )}`;
-  };
 
   const getCellContent = (value: number) => {
     if (value === GAME_CONSTANTS.MARK_X) return "X";
@@ -249,7 +243,7 @@ export function GameViewer({ gameId }: GameViewerProps) {
                       : "text-black"
                   }`}
                 >
-                  {truncateAddress(gameData.x)}
+                  <AddressDisplay address={gameData.x} />
                 </div>
               </div>
               <div
@@ -275,7 +269,7 @@ export function GameViewer({ gameId }: GameViewerProps) {
                       : "text-black"
                   }`}
                 >
-                  {truncateAddress(gameData.o)}
+                  <AddressDisplay address={gameData.o} />
                 </div>
               </div>
             </div>

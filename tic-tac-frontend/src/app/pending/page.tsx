@@ -4,10 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import { getUserGames } from "@/utils/game-queries";
 import { GAME_STATUS } from "@/config/constants";
-import { Clock, AlertTriangle, Trophy, Users, ArrowLeft } from "lucide-react";
+import { Clock, AlertTriangle, Trophy, Users, ArrowLeft, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useLanguage } from "@/hooks/useLanguage";
 import { GameState } from "@/components/TicTacToeGame";
+import { AddressDisplay } from "@/components/AddressDisplay";
 
 interface PendingGame {
   game: GameState;
@@ -99,10 +101,6 @@ export default function PendingMovesPage() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const truncateAddress = (address: string) => {
-    if (address.length <= 10) return address;
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   const navigateToGame = (gameId: string) => {
     router.push(`/game/${gameId}`);
@@ -129,12 +127,22 @@ export default function PendingMovesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <button
-              onClick={goBack}
-              className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goBack}
+                className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
+                title="Go back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <Link
+                href="/"
+                className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
+                title="Go home"
+              >
+                <Home className="w-5 h-5" />
+              </Link>
+            </div>
             <div>
               <h1 className="text-3xl font-bold text-black">{t("pendingMoves")}</h1>
               <p className="text-gray-600">{t("gamesRequiringAttention")}</p>
@@ -203,7 +211,7 @@ export default function PendingMovesPage() {
 
                       {/* Opponent */}
                       <div className="text-sm text-gray-600 mb-2">
-                        vs {truncateAddress(pendingGame.opponent)}
+                        vs <AddressDisplay address={pendingGame.opponent} />
                       </div>
 
                       {/* Turn Status */}

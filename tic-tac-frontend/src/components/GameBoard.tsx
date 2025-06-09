@@ -11,13 +11,13 @@ import {
   XCircle,
   Clock,
 } from "lucide-react";
-import { GAME_MODE } from "@/config/constants";
 import { GameState } from "./TicTacToeGame";
-import { GAME_CONSTANTS, UI_CONFIG, GAME_STATUS } from "@/config/constants";
+import { GAME_CONSTANTS, GAME_STATUS } from "@/config/constants";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useGameTimer } from "@/hooks/useGameTimer";
 import { useState, useEffect, useRef } from "react";
+import { AddressDisplay } from "@/components/AddressDisplay";
 
 interface GameBoardProps {
   gameState: GameState;
@@ -122,12 +122,6 @@ export function GameBoard({
     interval: 2000, // Poll every 2 seconds
   });
 
-  const truncateAddress = (address: string) => {
-    if (address.length <= UI_CONFIG.MAX_ADDRESS_LENGTH) return address;
-    return `${address.slice(0, UI_CONFIG.TRUNCATE_START)}...${address.slice(
-      -UI_CONFIG.TRUNCATE_END
-    )}`;
-  };
 
   const getCurrentPlayer = () => {
     return turn % 2 === 0 ? x : o;
@@ -368,7 +362,7 @@ export function GameBoard({
                 currentPlayer === x ? "text-white" : "text-black"
               }`}
             >
-              {truncateAddress(x)}
+              <AddressDisplay address={x} />
             </div>
             {currentPlayer === x && (
               <div className="text-xs text-white mt-1">{t("you")} ✓</div>
@@ -402,7 +396,7 @@ export function GameBoard({
                 currentPlayer === o ? "text-white" : "text-black"
               }`}
             >
-              {truncateAddress(o)}
+              <AddressDisplay address={o} />
             </div>
             {currentPlayer === o && (
               <div className="text-xs text-white mt-1">{t("you")} ✓</div>

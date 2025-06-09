@@ -46,7 +46,7 @@ export function NotificationBadge() {
   }, [account, checkPendingMoves]);
 
   const handleClick = () => {
-    router.push("/my-games");
+    router.push("/pending");
   };
 
   if (!account || pendingMoves === 0) {

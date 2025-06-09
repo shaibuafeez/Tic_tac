@@ -23,7 +23,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useGameSync } from "@/hooks/useGameSync";
 import { useLanguage } from "@/hooks/useLanguage";
-import { isZeroAddress } from "@/utils/sui-helpers";
 
 export interface GameState {
   id: string;
@@ -215,7 +214,7 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
     }
   };
 
-  const createGame = async (mode: number, stakeAmount?: number) => {
+  const createGame = async (mode: number, stakeAmount?: number, invitedPlayer?: string) => {
     if (!account) return;
 
     setIsLoading(true);
@@ -233,10 +232,22 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
           transaction.pure.u64(stakeAmount),
         ]);
 
-        transaction.moveCall({
-          target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::create_competitive_game`,
-          arguments: [coin, transaction.object('0x6')], // Stake and Clock
-        });
+        // Use the invite function if an invited player is specified
+        if (invitedPlayer) {
+          transaction.moveCall({
+            target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::create_competitive_game_with_invite`,
+            arguments: [
+              coin, 
+              transaction.pure.address(invitedPlayer),
+              transaction.object('0x6')
+            ], // Stake, Invited Player, and Clock
+          });
+        } else {
+          transaction.moveCall({
+            target: `${CONTRACT_CONFIG.PACKAGE_ID}::tic_tac::create_competitive_game`,
+            arguments: [coin, transaction.object('0x6')], // Stake and Clock
+          });
+        }
       }
 
       signAndExecute(

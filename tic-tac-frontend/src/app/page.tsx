@@ -9,8 +9,6 @@ import {
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { NotificationBadge } from "@/components/NotificationBadge";
 import { GlobalTimer } from "@/components/GlobalTimer";
-import { LanguageTest } from "@/components/LanguageTest";
-import { TimerTest } from "@/components/TimerTest";
 import { useLanguage } from "@/hooks/useLanguage";
 import { CONTRACT_CONFIG } from "@/config/constants";
 import { useState, useEffect } from "react";
@@ -59,14 +57,6 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <nav className="flex items-center gap-4">
-              {account && (
-                <Link
-                  href="/pending"
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all text-black"
-                >
-{t("pendingMoves")}
-                </Link>
-              )}
               <Link
                 href="/leaderboard"
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all text-black"
@@ -93,13 +83,6 @@ export default function Home() {
           <TicTacToeGame />
         </main>
 
-        {/* Temporary language test component */}
-        <LanguageTest />
-        
-        {/* Timer test component */}
-        {process.env.NODE_ENV === 'development' && (
-          <TimerTest />
-        )}
       </div>
     </div>
   );

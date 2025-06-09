@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { CONTRACT_CONFIG, MAX_LEADERBOARD_SIZE } from "@/config/constants";
 import { useLanguage } from "@/hooks/useLanguage";
+import { AddressDisplay } from "@/components/AddressDisplay";
 
 interface PlayerStats {
   player: string;
@@ -218,10 +219,6 @@ export default function LeaderboardPage() {
     return (mist / 1_000_000_000).toFixed(2);
   };
 
-  const truncateAddress = (address: string) => {
-    if (address.includes("...")) return address;
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy className="w-5 h-5 text-yellow-500" />;
@@ -364,7 +361,7 @@ export default function LeaderboardPage() {
                         </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">
-                        {truncateAddress(player.player)}
+                        <AddressDisplay address={player.player} />
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">

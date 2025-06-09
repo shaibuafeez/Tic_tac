@@ -156,6 +156,13 @@ export const translations = {
     adminAccessRequiresWallet: 'Please connect your wallet to access admin features',
     totalVolume: 'Total Volume',
     currentBalance: 'Current Balance',
+    
+    // Game invitations
+    gameInviteTitle: 'Game Invitation',
+    gameInviteFrom: 'From: {{player}}',
+    gameInviteStake: 'Stake: {{amount}} SUI',
+    gameInviteAccept: 'Join Game',
+    gameInviteDismiss: 'Dismiss'
   },
   
   es: {
@@ -315,6 +322,13 @@ export const translations = {
     adminAccessRequiresWallet: 'Por favor conecta tu billetera para acceder a funciones de administrador',
     totalVolume: 'Volumen Total',
     currentBalance: 'Saldo Actual',
+    
+    // Game invitations
+    gameInviteTitle: 'Invitación de Juego',
+    gameInviteFrom: 'De: {{player}}',
+    gameInviteStake: 'Apuesta: {{amount}} SUI',
+    gameInviteAccept: 'Unirse al Juego',
+    gameInviteDismiss: 'Descartar'
   },
   
   zh: {
@@ -410,6 +424,14 @@ export const translations = {
     shareGame: '分享游戏',
     rematch: '再来一局',
     claimVictory: '宣告胜利',
+    requestRematch: '请求再来一局',
+    acceptRematch: '接受再来一局',
+    declineRematch: '拒绝',
+    rematchRequested: '已请求再来一局',
+    rematchDeclined: '再来一局被拒绝',
+    rematchInProgress: '再来一局进行中...',
+    noRematchRequested: '没有请求再来一局',
+    opponentWantsRematch: '想要再来一局！',
     
     // Game creation
     enterStakeAmount: '输入押注金额',
@@ -466,6 +488,13 @@ export const translations = {
     adminAccessRequiresWallet: '请连接您的钱包以访问管理功能',
     totalVolume: '总交易量',
     currentBalance: '当前余额',
+    
+    // Game invitations
+    gameInviteTitle: '游戏邀请',
+    gameInviteFrom: '来自: {{player}}',
+    gameInviteStake: '押注: {{amount}} SUI',
+    gameInviteAccept: '加入游戏',
+    gameInviteDismiss: '忽略'
   }
 };
 

@@ -103,6 +103,7 @@ module tic_tac::tic_tac {
         stake_amount: u64,
         game_link: String,
         viewer_link: String,
+        invited_player: address, // 0x0 if open to anyone
     }
 
     public struct GameJoined has copy, drop {
@@ -200,6 +201,7 @@ module tic_tac::tic_tac {
             stake_amount: 0,
             game_link,
             viewer_link,
+            invited_player: @0x0, // Open to anyone
         });
 
         transfer::share_object(game);
@@ -251,6 +253,60 @@ module tic_tac::tic_tac {
             stake_amount,
             game_link,
             viewer_link,
+            invited_player: @0x0, // Open to anyone
+        });
+
+        transfer::share_object(game);
+        (game_link, viewer_link)
+    }
+
+    // Create a competitive game with invited player (for rematches)
+    public fun create_competitive_game_with_invite(
+        stake: Coin<SUI>, 
+        invited_player: address,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ): (String, String) {
+        let stake_amount = coin::value(&stake);
+        let game_id = object::new(ctx);
+        let game_address = object::uid_to_address(&game_id);
+        
+        let game_link = generate_game_link(game_address, false);
+        let viewer_link = generate_game_link(game_address, true);
+        
+        let current_time = clock::timestamp_ms(clock);
+        
+        let game = Game {
+            id: game_id,
+            board: vector[
+                MARK_EMPTY, MARK_EMPTY, MARK_EMPTY,
+                MARK_EMPTY, MARK_EMPTY, MARK_EMPTY,
+                MARK_EMPTY, MARK_EMPTY, MARK_EMPTY
+            ],
+            turn: 0,
+            x: tx_context::sender(ctx),
+            o: @0x0, // Will be set when opponent joins
+            mode: MODE_COMPETITIVE,
+            status: STATUS_WAITING,
+            stake_amount,
+            prize_pool: coin::into_balance(stake),
+            creator: tx_context::sender(ctx),
+            winner: @0x0,
+            game_link,
+            viewer_link,
+            created_at_ms: current_time,
+            completed_at_ms: 0,
+            last_move_ms: current_time,
+        };
+
+        event::emit(GameCreated {
+            game_id: game_address,
+            creator: tx_context::sender(ctx),
+            mode: MODE_COMPETITIVE,
+            stake_amount,
+            game_link,
+            viewer_link,
+            invited_player, // Specific player invited
         });
 
         transfer::share_object(game);

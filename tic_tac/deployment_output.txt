@@ -1,0 +1,643 @@
+[Note]: Dependency sources are no longer verified automatically during publication and upgrade. You can pass the `--verify-deps` option if you would like to verify them as part of publication or upgrade.
+[note] Dependencies on Bridge, MoveStdlib, Sui, and SuiSystem are automatically added, but this feature is disabled for your package because you have explicitly included dependencies on Sui. Consider removing these dependencies from Move.toml.
+UPDATING GIT DEPENDENCY https://github.com/MystenLabs/sui.git
+INCLUDING DEPENDENCY Sui
+INCLUDING DEPENDENCY MoveStdlib
+BUILDING tic_tac
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:2:23
+  [0m[34m│[0m
+[0m[34m2[0m [0m[34m│[0m     use sui::object::{[0m[33mSelf[0m, UID};
+  [0m[34m│[0m                       [0m[33m^^^^[0m [0m[33mUnnecessary alias 'object' for module 'sui::object'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:2:29
+  [0m[34m│[0m
+[0m[34m2[0m [0m[34m│[0m     use sui::object::{Self, [0m[33mUID[0m};
+  [0m[34m│[0m                             [0m[33m^^^[0m [0m[33mUnnecessary alias 'UID' for module member 'sui::object::UID'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:3:14
+  [0m[34m│[0m
+[0m[34m3[0m [0m[34m│[0m     use sui::[0m[33mtransfer[0m;
+  [0m[34m│[0m              [0m[33m^^^^^^^^[0m [0m[33mUnnecessary alias 'transfer' for module 'sui::transfer'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:3:14
+  [0m[34m│[0m
+[0m[34m3[0m [0m[34m│[0m     use sui::[0m[33mtransfer[0m;
+  [0m[34m│[0m              [0m[33m^^^^^^^^[0m [0m[33mUnused 'use' of alias 'transfer'. Consider removing it[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:4:27
+  [0m[34m│[0m
+[0m[34m4[0m [0m[34m│[0m     use sui::tx_context::{[0m[33mSelf[0m, TxContext};
+  [0m[34m│[0m                           [0m[33m^^^^[0m [0m[33mUnnecessary alias 'tx_context' for module 'sui::tx_context'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:4:33
+  [0m[34m│[0m
+[0m[34m4[0m [0m[34m│[0m     use sui::tx_context::{Self, [0m[33mTxContext[0m};
+  [0m[34m│[0m                                 [0m[33m^^^^^^^^^[0m [0m[33mUnnecessary alias 'TxContext' for module member 'sui::tx_context::TxContext'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:5:21
+  [0m[34m│[0m
+[0m[34m5[0m [0m[34m│[0m     use sui::coin::{[0m[33mSelf[0m, Coin};
+  [0m[34m│[0m                     [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'coin'. Consider removing it[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:5:27
+  [0m[34m│[0m
+[0m[34m5[0m [0m[34m│[0m     use sui::coin::{Self, [0m[33mCoin[0m};
+  [0m[34m│[0m                           [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'Coin'. Consider removing it[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:7:24
+  [0m[34m│[0m
+[0m[34m7[0m [0m[34m│[0m     use sui::balance::{[0m[33mSelf[0m, Balance};
+  [0m[34m│[0m                        [0m[33m^^^^[0m [0m[33mUnused 'use' of alias 'balance'. Consider removing it[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:9:14
+  [0m[34m│[0m
+[0m[34m9[0m [0m[34m│[0m     use std::[0m[33mvector[0m;
+  [0m[34m│[0m              [0m[33m^^^^^^[0m [0m[33mUnnecessary alias 'vector' for module 'std::vector'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:13:11
+   [0m[34m│[0m
+[0m[34m13[0m [0m[34m│[0m     const [0m[33mMARK_EMPTY[0m: u8 = 0;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^[0m [0m[33mThe constant 'MARK_EMPTY' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:14:11
+   [0m[34m│[0m
+[0m[34m14[0m [0m[34m│[0m     const [0m[33mMARK_X[0m: u8 = 1;
+   [0m[34m│[0m           [0m[33m^^^^^^[0m [0m[33mThe constant 'MARK_X' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:15:11
+   [0m[34m│[0m
+[0m[34m15[0m [0m[34m│[0m     const [0m[33mMARK_O[0m: u8 = 2;
+   [0m[34m│[0m           [0m[33m^^^^^^[0m [0m[33mThe constant 'MARK_O' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:18:11
+   [0m[34m│[0m
+[0m[34m18[0m [0m[34m│[0m     const [0m[33mMODE_FRIENDLY[0m: u8 = 0;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^[0m [0m[33mThe constant 'MODE_FRIENDLY' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:22:11
+   [0m[34m│[0m
+[0m[34m22[0m [0m[34m│[0m     const [0m[33mSTATUS_WAITING[0m: u8 = 0;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^[0m [0m[33mThe constant 'STATUS_WAITING' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:24:11
+   [0m[34m│[0m
+[0m[34m24[0m [0m[34m│[0m     const [0m[33mSTATUS_COMPLETED[0m: u8 = 2;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'STATUS_COMPLETED' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:25:11
+   [0m[34m│[0m
+[0m[34m25[0m [0m[34m│[0m     const [0m[33mSTATUS_CANCELLED[0m: u8 = 3;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'STATUS_CANCELLED' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:29:11
+   [0m[34m│[0m
+[0m[34m29[0m [0m[34m│[0m     const [0m[33mPLATFORM_FEE_BPS[0m: u64 = 1000;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'PLATFORM_FEE_BPS' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:30:11
+   [0m[34m│[0m
+[0m[34m30[0m [0m[34m│[0m     const [0m[33mBPS_BASE[0m: u64 = 10000;
+   [0m[34m│[0m           [0m[33m^^^^^^^^[0m [0m[33mThe constant 'BPS_BASE' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:41:11
+   [0m[34m│[0m
+[0m[34m41[0m [0m[34m│[0m     const [0m[33mEInvalidLocation[0m: u64 = 1;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EInvalidLocation' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:42:11
+   [0m[34m│[0m
+[0m[34m42[0m [0m[34m│[0m     const [0m[33mEGameOver[0m: u64 = 2;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^[0m [0m[33mThe constant 'EGameOver' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:43:11
+   [0m[34m│[0m
+[0m[34m43[0m [0m[34m│[0m     const [0m[33mECellOccupied[0m: u64 = 3;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^[0m [0m[33mThe constant 'ECellOccupied' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:44:11
+   [0m[34m│[0m
+[0m[34m44[0m [0m[34m│[0m     const [0m[33mEInsufficientStake[0m: u64 = 4;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EInsufficientStake' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:45:11
+   [0m[34m│[0m
+[0m[34m45[0m [0m[34m│[0m     const [0m[33mEGameNotWaiting[0m: u64 = 5;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EGameNotWaiting' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:46:11
+   [0m[34m│[0m
+[0m[34m46[0m [0m[34m│[0m     const [0m[33mENotCreator[0m: u64 = 6;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^[0m [0m[33mThe constant 'ENotCreator' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:47:11
+   [0m[34m│[0m
+[0m[34m47[0m [0m[34m│[0m     const [0m[33mEWrongGameMode[0m: u64 = 7;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EWrongGameMode' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:48:11
+   [0m[34m│[0m
+[0m[34m48[0m [0m[34m│[0m     const [0m[33mEAlreadyJoined[0m: u64 = 8;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EAlreadyJoined' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:49:11
+   [0m[34m│[0m
+[0m[34m49[0m [0m[34m│[0m     const [0m[33mECannotJoinOwnGame[0m: u64 = 9;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'ECannotJoinOwnGame' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:53:11
+   [0m[34m│[0m
+[0m[34m53[0m [0m[34m│[0m     const [0m[33mEInsufficientBalance[0m: u64 = 13;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EInsufficientBalance' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:78:9
+   [0m[34m│[0m
+[0m[34m78[0m [0m[34m│[0m         [0m[33mboard[0m: vector<u8>,
+   [0m[34m│[0m         [0m[33m^^^^^[0m [0m[33mThe 'board' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:84:9
+   [0m[34m│[0m
+[0m[34m84[0m [0m[34m│[0m         [0m[33mstake_amount[0m: u64,
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^^^[0m [0m[33mThe 'stake_amount' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:85:9
+   [0m[34m│[0m
+[0m[34m85[0m [0m[34m│[0m         [0m[33mprize_pool[0m: Balance<SUI>,
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^[0m [0m[33mThe 'prize_pool' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:86:9
+   [0m[34m│[0m
+[0m[34m86[0m [0m[34m│[0m         [0m[33mcreator[0m: address,
+   [0m[34m│[0m         [0m[33m^^^^^^^[0m [0m[33mThe 'creator' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:88:9
+   [0m[34m│[0m
+[0m[34m88[0m [0m[34m│[0m         [0m[33mgame_link[0m: String,
+   [0m[34m│[0m         [0m[33m^^^^^^^^^[0m [0m[33mThe 'game_link' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:89:9
+   [0m[34m│[0m
+[0m[34m89[0m [0m[34m│[0m         [0m[33mviewer_link[0m: String,
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^^[0m [0m[33mThe 'viewer_link' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:90:9
+   [0m[34m│[0m
+[0m[34m90[0m [0m[34m│[0m         [0m[33mcreated_at[0m: u64,
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^[0m [0m[33mThe 'created_at' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:93:9
+   [0m[34m│[0m
+[0m[34m93[0m [0m[34m│[0m         [0m[33mx_total_time[0m: u64,    // Total time used by X
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^^^[0m [0m[33mThe 'x_total_time' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:94:9
+   [0m[34m│[0m
+[0m[34m94[0m [0m[34m│[0m         [0m[33mo_total_time[0m: u64,    // Total time used by O
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^^^[0m [0m[33mThe 'o_total_time' field of the 'GameEnhanced' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+    [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:108:9
+    [0m[34m│[0m
+[0m[34m108[0m [0m[34m│[0m         [0m[33mnew_profit[0m: u64,
+    [0m[34m│[0m         [0m[33m^^^^^^^^^^[0m [0m[33mThe 'new_profit' field of the 'LeaderboardUpdated' type is unused[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+    [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac_enhanced.move:109:9
+    [0m[34m│[0m
+[0m[34m109[0m [0m[34m│[0m         [0m[33mrank[0m: u64,
+    [0m[34m│[0m         [0m[33m^^^^[0m [0m[33mThe 'rank' field of the 'LeaderboardUpdated' type is unused[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:2:23
+  [0m[34m│[0m
+[0m[34m2[0m [0m[34m│[0m     use sui::object::{[0m[33mSelf[0m, UID};
+  [0m[34m│[0m                       [0m[33m^^^^[0m [0m[33mUnnecessary alias 'object' for module 'sui::object'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:2:29
+  [0m[34m│[0m
+[0m[34m2[0m [0m[34m│[0m     use sui::object::{Self, [0m[33mUID[0m};
+  [0m[34m│[0m                             [0m[33m^^^[0m [0m[33mUnnecessary alias 'UID' for module member 'sui::object::UID'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:3:14
+  [0m[34m│[0m
+[0m[34m3[0m [0m[34m│[0m     use sui::[0m[33mtransfer[0m;
+  [0m[34m│[0m              [0m[33m^^^^^^^^[0m [0m[33mUnnecessary alias 'transfer' for module 'sui::transfer'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:4:27
+  [0m[34m│[0m
+[0m[34m4[0m [0m[34m│[0m     use sui::tx_context::{[0m[33mSelf[0m, TxContext};
+  [0m[34m│[0m                           [0m[33m^^^^[0m [0m[33mUnnecessary alias 'tx_context' for module 'sui::tx_context'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:4:33
+  [0m[34m│[0m
+[0m[34m4[0m [0m[34m│[0m     use sui::tx_context::{Self, [0m[33mTxContext[0m};
+  [0m[34m│[0m                                 [0m[33m^^^^^^^^^[0m [0m[33mUnnecessary alias 'TxContext' for module member 'sui::tx_context::TxContext'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:10:14
+   [0m[34m│[0m
+[0m[34m10[0m [0m[34m│[0m     use std::[0m[33mvector[0m;
+   [0m[34m│[0m              [0m[33m^^^^^^[0m [0m[33mUnnecessary alias 'vector' for module 'std::vector'. This alias is provided by default[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:38:11
+   [0m[34m│[0m
+[0m[34m38[0m [0m[34m│[0m     const [0m[33mEGameOver[0m: u64 = 2;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^[0m [0m[33mThe constant 'EGameOver' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:42:11
+   [0m[34m│[0m
+[0m[34m42[0m [0m[34m│[0m     const [0m[33mENotCreator[0m: u64 = 6;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^[0m [0m[33mThe constant 'ENotCreator' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:44:11
+   [0m[34m│[0m
+[0m[34m44[0m [0m[34m│[0m     const [0m[33mEAlreadyJoined[0m: u64 = 8;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EAlreadyJoined' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:49:11
+   [0m[34m│[0m
+[0m[34m49[0m [0m[34m│[0m     const [0m[33mEGameNotCompleted[0m: u64 = 13;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^^^^[0m [0m[33mThe constant 'EGameNotCompleted' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/tic_tac.move:50:11
+   [0m[34m│[0m
+[0m[34m50[0m [0m[34m│[0m     const [0m[33mENotPlayer[0m: u64 = 14;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^[0m [0m[33mThe constant 'ENotPlayer' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/leaderboard.move:2:23
+  [0m[34m│[0m
+[0m[34m2[0m [0m[34m│[0m     use sui::object::{[0m[33mSelf[0m, UID};
+  [0m[34m│[0m                       [0m[33m^^^^[0m [0m[33mUnnecessary alias 'object' for module 'sui::object'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/leaderboard.move:2:29
+  [0m[34m│[0m
+[0m[34m2[0m [0m[34m│[0m     use sui::object::{Self, [0m[33mUID[0m};
+  [0m[34m│[0m                             [0m[33m^^^[0m [0m[33mUnnecessary alias 'UID' for module member 'sui::object::UID'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/leaderboard.move:3:14
+  [0m[34m│[0m
+[0m[34m3[0m [0m[34m│[0m     use sui::[0m[33mtransfer[0m;
+  [0m[34m│[0m              [0m[33m^^^^^^^^[0m [0m[33mUnnecessary alias 'transfer' for module 'sui::transfer'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/leaderboard.move:4:27
+  [0m[34m│[0m
+[0m[34m4[0m [0m[34m│[0m     use sui::tx_context::{[0m[33mSelf[0m, TxContext};
+  [0m[34m│[0m                           [0m[33m^^^^[0m [0m[33mUnnecessary alias 'tx_context' for module 'sui::tx_context'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/leaderboard.move:4:33
+  [0m[34m│[0m
+[0m[34m4[0m [0m[34m│[0m     use sui::tx_context::{Self, [0m[33mTxContext[0m};
+  [0m[34m│[0m                                 [0m[33m^^^^^^^^^[0m [0m[33mUnnecessary alias 'TxContext' for module member 'sui::tx_context::TxContext'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/leaderboard.move:6:14
+  [0m[34m│[0m
+[0m[34m6[0m [0m[34m│[0m     use std::[0m[33mvector[0m;
+  [0m[34m│[0m              [0m[33m^^^^^^[0m [0m[33mUnnecessary alias 'vector' for module 'std::vector'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09011][0m[1m: unused constant[0m
+   [0m[34m┌─[0m /Users/emmanuelosadebe/Downloads/Game/tic_tac/sources/leaderboard.move:12:11
+   [0m[34m│[0m
+[0m[34m12[0m [0m[34m│[0m     const [0m[33mENotAuthorized[0m: u64 = 0;
+   [0m[34m│[0m           [0m[33m^^^^^^^^^^^^^^[0m [0m[33mThe constant 'ENotAuthorized' is never used. Consider removing it.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_const)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+Skipping dependency verification
+Transaction Digest: CWThrDaj6StnRF3o6dD64hPyKhDFf9x1LdZsj2nT3Wwg
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Transaction Data                                                                                             │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Sender: 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3                                   │
+│ Gas Owner: 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3                                │
+│ Gas Budget: 100000000 MIST                                                                                   │
+│ Gas Price: 1000 MIST                                                                                         │
+│ Gas Payment:                                                                                                 │
+│  ┌──                                                                                                         │
+│  │ ID: 0x0c4ec6ca41ae4bd5434bba44bb348291b0fb1b014a0ca651e5af9c1d1455d18c                                    │
+│  │ Version: 454952193                                                                                        │
+│  │ Digest: F2JH6mATxy5LZXyqUX5WYoufpkM2MtD41vi69d1w6WRu                                                      │
+│  └──                                                                                                         │
+│                                                                                                              │
+│ Transaction Kind: Programmable                                                                               │
+│ ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
+│ │ Input Objects                                                                                            │ │
+│ ├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ 0   Pure Arg: Type: address, Value: "0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3" │ │
+│ ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
+│ ╭─────────────────────────────────────────────────────────────────────────╮                                  │
+│ │ Commands                                                                │                                  │
+│ ├─────────────────────────────────────────────────────────────────────────┤                                  │
+│ │ 0  Publish:                                                             │                                  │
+│ │  ┌                                                                      │                                  │
+│ │  │ Dependencies:                                                        │                                  │
+│ │  │   0x0000000000000000000000000000000000000000000000000000000000000001 │                                  │
+│ │  │   0x0000000000000000000000000000000000000000000000000000000000000002 │                                  │
+│ │  └                                                                      │                                  │
+│ │                                                                         │                                  │
+│ │ 1  TransferObjects:                                                     │                                  │
+│ │  ┌                                                                      │                                  │
+│ │  │ Arguments:                                                           │                                  │
+│ │  │   Result 0                                                           │                                  │
+│ │  │ Address: Input  0                                                    │                                  │
+│ │  └                                                                      │                                  │
+│ ╰─────────────────────────────────────────────────────────────────────────╯                                  │
+│                                                                                                              │
+│ Signatures:                                                                                                  │
+│    OLVA8NnQTSvJIti5TOuixgdTg9+z40nhLlsQuaJo9bHAsQa2c6ug91OWWD9F2wSMn5MyVVyK+dDyMJAPW2BECA==                  │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Transaction Effects                                                                               │
+├───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Digest: CWThrDaj6StnRF3o6dD64hPyKhDFf9x1LdZsj2nT3Wwg                                              │
+│ Status: Success                                                                                   │
+│ Executed Epoch: 760                                                                               │
+│                                                                                                   │
+│ Created Objects:                                                                                  │
+│  ┌──                                                                                              │
+│  │ ID: 0x04f2ff0c2887c17bb675fe26ee2f32097b8498fd23199c4cf7b2ccb18e3bf23b                         │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )  │
+│  │ Version: 454952194                                                                             │
+│  │ Digest: CLXcksvJZBPviQhhEHzZNoceQbVm7WWuseRGfzb5rLYU                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x32427a88755ea973174771427c01f6c98821c0e6f60534b097a5de9928b107bc                         │
+│  │ Owner: Immutable                                                                               │
+│  │ Version: 1                                                                                     │
+│  │ Digest: 2MR7zMN2SD8RAVqF4fdffjDbJjtzupNG4k7uxTZM2T7k                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0x65b7f874db41286090fa7372cb242b11c2e8493faecc15c1cdc3f8d1d38b38a1                         │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )  │
+│  │ Version: 454952194                                                                             │
+│  │ Digest: CyN92LjyTn3F5knZpkQtraLtUGy4oRySWXJZ9XX7kihi                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0xc91bf80cd81d4b4ddf44fa8450d3cb07f68542f530b0edce75044c213ad354b2                         │
+│  │ Owner: Shared( 454952194 )                                                                     │
+│  │ Version: 454952194                                                                             │
+│  │ Digest: 7fNVEY6ndz6L3WosGNy6Y56SgYWAE8MWUFWGbRLw8vtV                                           │
+│  └──                                                                                              │
+│  ┌──                                                                                              │
+│  │ ID: 0xd92b80c36f1e949a27d6ead7044b93138c09d9e8ccd966c797de5b4be7933f8a                         │
+│  │ Owner: Shared( 454952194 )                                                                     │
+│  │ Version: 454952194                                                                             │
+│  │ Digest: 8Q7LQ4Ue4W1b7SjFH6drkSRLVhTtzYEjHPkokCiGecN7                                           │
+│  └──                                                                                              │
+│ Mutated Objects:                                                                                  │
+│  ┌──                                                                                              │
+│  │ ID: 0x0c4ec6ca41ae4bd5434bba44bb348291b0fb1b014a0ca651e5af9c1d1455d18c                         │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )  │
+│  │ Version: 454952194                                                                             │
+│  │ Digest: 6aQihRLuhSuWz51tS7ALvh7ZXBnRV8nUNmeLNaZJhAjZ                                           │
+│  └──                                                                                              │
+│ Gas Object:                                                                                       │
+│  ┌──                                                                                              │
+│  │ ID: 0x0c4ec6ca41ae4bd5434bba44bb348291b0fb1b014a0ca651e5af9c1d1455d18c                         │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )  │
+│  │ Version: 454952194                                                                             │
+│  │ Digest: 6aQihRLuhSuWz51tS7ALvh7ZXBnRV8nUNmeLNaZJhAjZ                                           │
+│  └──                                                                                              │
+│ Gas Cost Summary:                                                                                 │
+│    Storage Cost: 85203600 MIST                                                                    │
+│    Computation Cost: 1000000 MIST                                                                 │
+│    Storage Rebate: 978120 MIST                                                                    │
+│    Non-refundable Storage Fee: 9880 MIST                                                          │
+│                                                                                                   │
+│ Transaction Dependencies:                                                                         │
+│    z3RRdA6tLR8kmw9rNcXfezCqQdn32vDuqofSiPLgybS                                                    │
+│    6pZ2bpkwLwnCH4qdHS1NcJypXLFUNvSHRKfKXhZvXQuo                                                   │
+│    8GxJsh2Z34PMNFNDbAjFgwYvFjfoFmGkKK5F61m9zaPn                                                   │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────╮
+│ No transaction block events │
+╰─────────────────────────────╯
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Object Changes                                                                                               │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Created Objects:                                                                                             │
+│  ┌──                                                                                                         │
+│  │ ObjectID: 0x04f2ff0c2887c17bb675fe26ee2f32097b8498fd23199c4cf7b2ccb18e3bf23b                              │
+│  │ Sender: 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3                                │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )             │
+│  │ ObjectType: 0x32427a88755ea973174771427c01f6c98821c0e6f60534b097a5de9928b107bc::tic_tac::AdminCap         │
+│  │ Version: 454952194                                                                                        │
+│  │ Digest: CLXcksvJZBPviQhhEHzZNoceQbVm7WWuseRGfzb5rLYU                                                      │
+│  └──                                                                                                         │
+│  ┌──                                                                                                         │
+│  │ ObjectID: 0x65b7f874db41286090fa7372cb242b11c2e8493faecc15c1cdc3f8d1d38b38a1                              │
+│  │ Sender: 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3                                │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )             │
+│  │ ObjectType: 0x2::package::UpgradeCap                                                                      │
+│  │ Version: 454952194                                                                                        │
+│  │ Digest: CyN92LjyTn3F5knZpkQtraLtUGy4oRySWXJZ9XX7kihi                                                      │
+│  └──                                                                                                         │
+│  ┌──                                                                                                         │
+│  │ ObjectID: 0xc91bf80cd81d4b4ddf44fa8450d3cb07f68542f530b0edce75044c213ad354b2                              │
+│  │ Sender: 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3                                │
+│  │ Owner: Shared( 454952194 )                                                                                │
+│  │ ObjectType: 0x32427a88755ea973174771427c01f6c98821c0e6f60534b097a5de9928b107bc::leaderboard::Leaderboard  │
+│  │ Version: 454952194                                                                                        │
+│  │ Digest: 7fNVEY6ndz6L3WosGNy6Y56SgYWAE8MWUFWGbRLw8vtV                                                      │
+│  └──                                                                                                         │
+│  ┌──                                                                                                         │
+│  │ ObjectID: 0xd92b80c36f1e949a27d6ead7044b93138c09d9e8ccd966c797de5b4be7933f8a                              │
+│  │ Sender: 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3                                │
+│  │ Owner: Shared( 454952194 )                                                                                │
+│  │ ObjectType: 0x32427a88755ea973174771427c01f6c98821c0e6f60534b097a5de9928b107bc::tic_tac::Treasury         │
+│  │ Version: 454952194                                                                                        │
+│  │ Digest: 8Q7LQ4Ue4W1b7SjFH6drkSRLVhTtzYEjHPkokCiGecN7                                                      │
+│  └──                                                                                                         │
+│ Mutated Objects:                                                                                             │
+│  ┌──                                                                                                         │
+│  │ ObjectID: 0x0c4ec6ca41ae4bd5434bba44bb348291b0fb1b014a0ca651e5af9c1d1455d18c                              │
+│  │ Sender: 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3                                │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )             │
+│  │ ObjectType: 0x2::coin::Coin<0x2::sui::SUI>                                                                │
+│  │ Version: 454952194                                                                                        │
+│  │ Digest: 6aQihRLuhSuWz51tS7ALvh7ZXBnRV8nUNmeLNaZJhAjZ                                                      │
+│  └──                                                                                                         │
+│ Published Objects:                                                                                           │
+│  ┌──                                                                                                         │
+│  │ PackageID: 0x32427a88755ea973174771427c01f6c98821c0e6f60534b097a5de9928b107bc                             │
+│  │ Version: 1                                                                                                │
+│  │ Digest: 2MR7zMN2SD8RAVqF4fdffjDbJjtzupNG4k7uxTZM2T7k                                                      │
+│  │ Modules: leaderboard, tic_tac, tic_tac_enhanced                                                           │
+│  └──                                                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Balance Changes                                                                                   │
+├───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  ┌──                                                                                              │
+│  │ Owner: Account Address ( 0x9a5b0ad3a18964ab7c0dbf9ab4cdecfd6b3899423b47313ae6e78f4b801022a3 )  │
+│  │ CoinType: 0x2::sui::SUI                                                                        │
+│  │ Amount: -85225480                                                                              │
+│  └──                                                                                              │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────╯

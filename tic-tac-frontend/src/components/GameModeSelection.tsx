@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Users, Trophy, Loader2, AlertCircle } from "lucide-react";
 import { GAME_MODE } from "@/config/constants";
 import { useLanguage } from "@/hooks/useLanguage";
+import { SuiNSInput } from "./SuiNSInput";
+import { AddressDisplay } from "./AddressDisplay";
 
 interface GameModeSelectionProps {
-  onSelectMode: (mode: number, stakeAmount?: number) => void;
+  onSelectMode: (mode: number, stakeAmount?: number, invitedPlayer?: string) => void;
   isLoading: boolean;
   currentPlayer: string;
 }
@@ -20,6 +22,8 @@ export function GameModeSelection({
   const [selectedMode, setSelectedMode] = useState<number | null>(null);
   const [stakeAmount, setStakeAmount] = useState("2");
   const [showStakeInput, setShowStakeInput] = useState(false);
+  const [invitedPlayer, setInvitedPlayer] = useState("");
+  const [resolvedInviteAddress, setResolvedInviteAddress] = useState<string | null>(null);
 
   const handleModeSelect = (mode: number) => {
     if (mode === GAME_MODE.COMPETITIVE) {
@@ -32,12 +36,9 @@ export function GameModeSelection({
 
   const handleConfirmCompetitive = () => {
     const stakeInMist = parseFloat(stakeAmount) * 1_000_000_000; // Convert SUI to MIST
-    onSelectMode(GAME_MODE.COMPETITIVE, stakeInMist);
+    onSelectMode(GAME_MODE.COMPETITIVE, stakeInMist, resolvedInviteAddress || undefined);
   };
 
-  const truncateAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   if (showStakeInput && selectedMode === GAME_MODE.COMPETITIVE) {
     return (
@@ -71,12 +72,28 @@ export function GameModeSelection({
             <p className="mt-2 text-sm text-gray-600">{t("minimumStake")}</p>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-black mb-2">
+              Invite Player (Optional)
+            </label>
+            <SuiNSInput
+              value={invitedPlayer}
+              onChange={setInvitedPlayer}
+              onResolvedAddress={setResolvedInviteAddress}
+              placeholder="Enter name.sui or 0x... (leave empty for open game)"
+              excludeAddress={currentPlayer}
+            />
+          </div>
+
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800">
                 <p className="font-semibold mb-1">{t("important")}</p>
                 <p>{t("suiStakedImmediately")}</p>
+                {invitedPlayer.trim() && (
+                  <p className="mt-1">The invited player will receive a notification to join your game.</p>
+                )}
               </div>
             </div>
           </div>
@@ -84,7 +101,7 @@ export function GameModeSelection({
           <div className="space-y-2">
             <button
               onClick={handleConfirmCompetitive}
-              disabled={isLoading || parseFloat(stakeAmount) < 0.1}
+              disabled={isLoading || parseFloat(stakeAmount) < 0.1 || Boolean(invitedPlayer.trim() && resolvedInviteAddress === currentPlayer) || Boolean(invitedPlayer.trim() && invitedPlayer.includes('.') && !resolvedInviteAddress)}
               className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed modern-button active:scale-95"
             >
               {isLoading ? (
@@ -118,7 +135,7 @@ export function GameModeSelection({
           {t("chooseGameMode")}
         </h2>
         <p className="text-black">
-          Playing as {truncateAddress(currentPlayer)}
+          Playing as <AddressDisplay address={currentPlayer} />
         </p>
       </div>
 

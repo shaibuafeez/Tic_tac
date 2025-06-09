@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useSuiClient } from '@mysten/dapp-kit';
 import { GameState } from '@/components/TicTacToeGame';
-import { isZeroAddress } from '@/utils/sui-helpers';
 
 interface UseGameSyncProps {
   gameId: string | null;
