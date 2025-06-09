@@ -71,12 +71,16 @@ export default function InvitesPage() {
               
               // Determine status based on game state
               let status: 'pending' | 'accepted' | 'rejected' = 'pending';
-              if (fields.status === 0 && fields.o === '0x0') {
-                status = 'pending'; // Still waiting
-              } else if (fields.status === 1 || fields.o === account.address) {
-                status = 'accepted'; // Game started or user joined
+              if (fields.status === 0 && (fields.o === '0x0' || fields.o === '')) {
+                status = 'pending'; // Still waiting for someone to join
+              } else if (fields.o === account.address) {
+                status = 'accepted'; // Current user joined the game
+              } else if (fields.o && fields.o !== '0x0' && fields.o !== account.address) {
+                status = 'rejected'; // Someone else joined the game
+              } else if (fields.status === 2) {
+                status = 'rejected'; // Game was cancelled
               } else {
-                status = 'rejected'; // Game filled by someone else or cancelled
+                status = 'pending'; // Default fallback
               }
 
               userInvites.push({

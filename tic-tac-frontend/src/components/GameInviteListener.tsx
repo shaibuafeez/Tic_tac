@@ -16,10 +16,24 @@ interface GameInvite {
 export function GameInviteListener() {
   const [invites, setInvites] = useState<GameInvite[]>([]);
   const [showNotification, setShowNotification] = useState(false);
+  const [dismissedInvites, setDismissedInvites] = useState<Set<string>>(new Set());
   const suiClient = useSuiClient();
   const account = useCurrentAccount();
   const router = useRouter();
   const lastEventId = useRef<string | null>(null);
+
+  // Load dismissed invites from localStorage on mount
+  useEffect(() => {
+    const dismissed = localStorage.getItem('dismissedGameInvites');
+    if (dismissed) {
+      try {
+        const parsedDismissed = JSON.parse(dismissed);
+        setDismissedInvites(new Set(parsedDismissed));
+      } catch (error) {
+        console.error('Error parsing dismissed invites:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!account?.address) return;
@@ -51,10 +65,11 @@ export function GameInviteListener() {
             stake_amount?: string;
           };
 
-          // Check if current user is invited
+          // Check if current user is invited and game hasn't been dismissed
           if (parsedEvent.invited_player === account.address && 
               parsedEvent.game_id && 
-              parsedEvent.creator) {
+              parsedEvent.creator &&
+              !dismissedInvites.has(parsedEvent.game_id)) {
             newInvites.push({
               gameId: parsedEvent.game_id,
               creator: parsedEvent.creator,
@@ -84,9 +99,21 @@ export function GameInviteListener() {
     const interval = setInterval(checkForInvites, 5000); // Check every 5 seconds
 
     return () => clearInterval(interval);
-  }, [account?.address, suiClient]);
+  }, [account?.address, suiClient, dismissedInvites]);
 
   const handleAcceptInvite = (invite: GameInvite) => {
+    // Add to dismissed set to prevent re-showing
+    const newDismissedInvites = new Set(dismissedInvites);
+    newDismissedInvites.add(invite.gameId);
+    setDismissedInvites(newDismissedInvites);
+    
+    // Update localStorage
+    try {
+      localStorage.setItem('dismissedGameInvites', JSON.stringify(Array.from(newDismissedInvites)));
+    } catch (error) {
+      console.error('Error saving dismissed invites:', error);
+    }
+    
     // Navigate to the game
     router.push(`/game/${invite.gameId}`);
     
@@ -100,6 +127,19 @@ export function GameInviteListener() {
   };
 
   const handleDismissInvite = (gameId: string) => {
+    // Add to dismissed set
+    const newDismissedInvites = new Set(dismissedInvites);
+    newDismissedInvites.add(gameId);
+    setDismissedInvites(newDismissedInvites);
+    
+    // Update localStorage
+    try {
+      localStorage.setItem('dismissedGameInvites', JSON.stringify(Array.from(newDismissedInvites)));
+    } catch (error) {
+      console.error('Error saving dismissed invites:', error);
+    }
+    
+    // Remove from current invites
     setInvites(prev => prev.filter(i => i.gameId !== gameId));
     
     // Hide notification if no more invites
