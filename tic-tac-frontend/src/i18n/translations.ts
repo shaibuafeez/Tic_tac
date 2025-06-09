@@ -115,6 +115,8 @@ export const translations = {
     prizePool: 'Prize Pool',
     winnerTakes: 'Winner takes',
     platformFee: 'Platform fee',
+    takes: 'takes',
+    setYourStakeAmount: 'Set your stake amount for this competitive game',
     
     // Wallet
     connectWallet: 'Connect Wallet',
@@ -282,6 +284,8 @@ export const translations = {
     prizePool: 'Premio Total',
     winnerTakes: 'El ganador se lleva',
     platformFee: 'Comisión de plataforma',
+    takes: 'recibe',
+    setYourStakeAmount: 'Establece tu cantidad de apuesta para este juego competitivo',
     
     // Wallet
     connectWallet: 'Conectar Billetera',
@@ -449,6 +453,8 @@ export const translations = {
     prizePool: '奖池',
     winnerTakes: '赢家获得',
     platformFee: '平台费用',
+    takes: '获得',
+    setYourStakeAmount: '设置此竞技游戏的押注金额',
     
     // Wallet
     connectWallet: '连接钱包',

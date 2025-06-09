@@ -3,7 +3,6 @@
 import {
   Trophy,
   Loader2,
-  AlertCircle,
   Users,
   Twitter,
   XCircle,
@@ -52,7 +51,7 @@ export function JoinGame({
 
   const shareToTwitter = () => {
     const suiAmount = stakeAmount / 1_000_000_000;
-    const winAmount = suiAmount * 2 * 0.9;
+    const totalPot = suiAmount * 2;
     const gameLink = `${window.location.origin}/game/${gameId}`;
     const viewerLink = `${window.location.origin}/view/${gameId}`;
 
@@ -62,7 +61,7 @@ export function JoinGame({
         isCompetitive && stakeAmount > 0
           ? `🎮 Who wants to play for ${suiAmount.toFixed(
               2
-            )} SUI? I'm waiting on @SuiNetwork!\n\n💰 Winner takes ${winAmount.toFixed(
+            )} SUI? I'm waiting on @SuiNetwork!\n\n💰 Prize pool: ${totalPot.toFixed(
               2
             )} SUI\n🎯 Join my game: ${gameLink}\n👀 Watch live: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`
           : `🎮 Who's up for a game of Tic-Tac-Toe on @SuiNetwork?\n\n🏆 Win NFT trophies\n🎯 Join my game: ${gameLink}\n👀 Watch live: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
@@ -71,7 +70,7 @@ export function JoinGame({
         isCompetitive && stakeAmount > 0
           ? `🎮 About to play for ${suiAmount.toFixed(
               2
-            )} SUI on @SuiNetwork!\n\n💰 Winner takes ${winAmount.toFixed(
+            )} SUI on @SuiNetwork!\n\n💰 Prize pool: ${totalPot.toFixed(
               2
             )} SUI\n👀 Watch us play: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`
           : `🎮 Joining a Tic-Tac-Toe game on @SuiNetwork!\n\n🏆 Playing for NFT trophies\n👀 Watch us play: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
@@ -142,19 +141,11 @@ export function JoinGame({
         </div>
 
         {isCompetitive && (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-yellow-900">
-                <p className="font-semibold mb-1">{t("prizeDistribution")}</p>
-                <p>
-                  {t("winner")}: {formatSUI(stakeAmount * 2 * 0.9)} SUI (90%)
-                </p>
-                <p>
-                  {t("platformFee")}: {formatSUI(stakeAmount * 2 * 0.1)} SUI
-                  (10%)
-                </p>
-              </div>
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="text-sm text-gray-600 text-center">
+              <p className="font-medium">
+                {t("winner")} {t("takes")} {formatSUI(stakeAmount * 2 * 0.9)} SUI
+              </p>
             </div>
           </div>
         )}

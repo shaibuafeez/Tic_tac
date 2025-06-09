@@ -664,12 +664,12 @@ export function TicTacToeGame({ gameId }: TicTacToeGameProps = {}) {
         {
           onSuccess: (result) => {
             console.log("Timeout victory claimed:", result);
-            const winAmount = gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0
-              ? (gameState.stakeAmount * 2 * 0.9) / 1_000_000_000
+            const totalPot = gameState.mode === GAME_MODE.COMPETITIVE && gameState.stakeAmount > 0
+              ? (gameState.stakeAmount * 2) / 1_000_000_000
               : 0;
             
-            if (winAmount > 0) {
-              alert(`🎉 Victory by timeout! You won ${winAmount.toFixed(2)} SUI!`);
+            if (totalPot > 0) {
+              alert(`🎉 Victory by timeout! You won the ${totalPot.toFixed(2)} SUI prize pool!`);
             } else {
               alert("🎉 Victory by timeout! You earned an NFT trophy!");
             }

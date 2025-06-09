@@ -217,7 +217,7 @@ export function GameBoard({
   const shareGameToTwitter = () => {
     const isCompetitive = gameState.mode === 1;
     const suiAmount = gameState.stakeAmount / 1_000_000_000;
-    const winAmount = suiAmount * 2 * 0.9;
+    const totalPot = suiAmount * 2;
     const gameLink = `${window.location.origin}/game/${gameState.id}`;
     const viewerLink = `${window.location.origin}/view/${gameState.id}`;
 
@@ -227,9 +227,9 @@ export function GameBoard({
         if (winner === currentPlayer) {
           message =
             isCompetitive && gameState.stakeAmount > 0
-              ? `🏆 Just won ${winAmount.toFixed(
+              ? `🏆 Just won a ${totalPot.toFixed(
                   2
-                )} SUI playing Tic-Tac-Toe on @SuiNetwork!\n\n🎮 Play me next: ${gameLink}\n👀 Watch the winning game: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`
+                )} SUI prize pool playing Tic-Tac-Toe on @SuiNetwork!\n\n🎮 Play me next: ${gameLink}\n👀 Watch the winning game: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`
               : `🏆 Victory! Just won a game of Tic-Tac-Toe on @SuiNetwork and earned an NFT trophy!\n\n🎮 Challenge me: ${gameLink}\n👀 Watch the game: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
         } else {
           message =
@@ -247,7 +247,7 @@ export function GameBoard({
         isCompetitive && gameState.stakeAmount > 0
           ? `🔥 Epic battle in progress! Playing for ${suiAmount.toFixed(
               2
-            )} SUI on @SuiNetwork!\n\n💰 Winner takes ${winAmount.toFixed(
+            )} SUI on @SuiNetwork!\n\n💰 Prize pool: ${totalPot.toFixed(
               2
             )} SUI\n👀 Watch live: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`
           : `🎮 Playing Tic-Tac-Toe on @SuiNetwork! Who's got the winning strategy?\n\n👀 Watch live: ${viewerLink}\n🎯 Join the fun: ${gameLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
@@ -415,11 +415,6 @@ export function GameBoard({
                 {((gameState.stakeAmount * 2) / 1_000_000_000).toFixed(2)} SUI
               </span>
             </div>
-            <p className="text-xs text-yellow-700 mt-1">
-              {t("winnerTakes")}{" "}
-              {((gameState.stakeAmount * 2 * 0.9) / 1_000_000_000).toFixed(2)}{" "}
-              SUI (90%)
-            </p>
           </div>
         )}
 

@@ -65,13 +65,13 @@ export function ShareGame({
   const shareToTwitter = () => {
     const isCompetitive = mode === 1;
     const suiAmount = stakeAmount / 1_000_000_000;
-    const winAmount = suiAmount * 2 * 0.9;
+    const totalPot = suiAmount * 2;
 
     let message = "";
     if (isCompetitive && stakeAmount > 0) {
       message = `🎮 Challenge accepted! Playing Tic-Tac-Toe on @SuiNetwork for ${suiAmount.toFixed(
         2
-      )} SUI!\n\n💰 Winner takes ${winAmount.toFixed(
+      )} SUI!\n\n💰 Prize pool: ${totalPot.toFixed(
         2
       )} SUI\n🎯 Join the game: ${gameLink}\n👀 Watch live: ${viewerLink}\n\n#Web3Gaming #Sui #TicTacToe @giverep`;
     } else {

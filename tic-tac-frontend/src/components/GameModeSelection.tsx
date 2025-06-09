@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Trophy, Loader2, AlertCircle } from "lucide-react";
+import { Users, Trophy, Loader2 } from "lucide-react";
 import { GAME_MODE } from "@/config/constants";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SuiNSInput } from "./SuiNSInput";
@@ -51,7 +51,7 @@ export function GameModeSelection({
             {t("stakeAmount")}
           </h2>
           <p className="text-black">
-            {t("winnerTakes")} 90%. {t("platformFee")} 10%.
+            {t("setYourStakeAmount")}
           </p>
         </div>
 
@@ -85,18 +85,13 @@ export function GameModeSelection({
             />
           </div>
 
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-amber-800">
-                <p className="font-semibold mb-1">{t("important")}</p>
-                <p>{t("suiStakedImmediately")}</p>
-                {invitedPlayer.trim() && (
-                  <p className="mt-1">The invited player will receive a notification to join your game.</p>
-                )}
+          {invitedPlayer.trim() && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-sm text-blue-700">
+                <p>The invited player will receive a notification to join your game.</p>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             <button
@@ -175,8 +170,7 @@ export function GameModeSelection({
                 {t("competitiveGame")}
               </h3>
               <p className="text-sm text-gray-600">
-                Put SUI at stake. {t("winnerTakes")} 90% of the {t("prizePool")}
-                .
+                Put SUI at stake and compete for the prize pool.
               </p>
             </div>
           </div>
